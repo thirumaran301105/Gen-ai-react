@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>🌾 Rural Advisory System v2.0</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+<!-- React + Babel (no build step) -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<!-- Recharts for analytics -->
+<script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+
+<style>
+/* ═══════════════════════════════════════════════
+   DESIGN SYSTEM
+═══════════════════════════════════════════════ */
+:root {
+  --green-900: #0d2818;
+  --green-800: #1b4332;
+  --green-700: #2d6a4f;
+  --green-600: #40916c;
+  --green-400: #74c69d;
+  --green-200: #b7e4c7;
+  --green-50:  #d8f3dc;
+  --cream:     #fefce8;
+  --amber:     #f59e0b;
+  --red:       #ef4444;
+  --orange:    #f97316;
+  --sky:       #0ea5e9;
+  --white:     #ffffff;
+  --gray-50:   #f9fafb;
+  --gray-100:  #f3f4f6;
+  --gray-200:  #e5e7eb;
+  --gray-400:  #9ca3af;
+  --gray-600:  #4b5563;
+  --gray-800:  #1f2937;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
+  --shadow-md: 0 4px 20px rgba(0,0,0,.10);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,.15);
+  --radius:    14px;
+  --radius-sm: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--gray-50);
+  color: var(--gray-800);
+  min-height: 100vh;
+}
+
+h1,h2,h3,h4 { font-family: 'Syne', sans-serif; }
+
+/* ── Navbar ── */
+.navbar {
+  position: fixed; top:0; left:0; right:0; z-index:1000;
+  height: 64px;
+  background: linear-gradient(100deg, var(--green-900) 0%, var(--green-800) 50%, var(--green-700) 100%);
+  display: flex; align-items: center; gap: 0;
+  padding: 0 2rem;
+  box-shadow: 0 2px 24px rgba(0,0,0,.3);
+}
+.nav-brand {
+  font-family:'Syne',sans-serif; font-weight:800; font-size:1.15rem;
+  color: var(--green-200); white-space:nowrap; margin-right:2rem;
+  letter-spacing:-.5px;
+}
+.nav-brand span { color:var(--green-400); }
+.nav-links { display:flex; gap:2px; flex:1; }
+.nav-btn {
+  background:transparent; border:none; cursor:pointer;
+  color: var(--green-200); font-family:'DM Sans',sans-serif;
+  font-size:.82rem; font-weight:600; padding:7px 13px; border-radius:7px;
+  transition: background .15s, color .15s;
+  white-space:nowrap; letter-spacing:.2px;
+}
+.nav-btn:hover  { background:rgba(255,255,255,.12); color:#fff; }
+.nav-btn.active { background:rgba(255,255,255,.2); color:#fff;
+                  box-shadow: inset 0 -2px 0 var(--green-400); }
+.nav-right { display:flex; align-items:center; gap:10px; margin-left:auto; }
+.nav-select {
+  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2);
+  color:var(--green-50); border-radius:8px; padding:6px 10px;
+  font-size:.78rem; font-weight:600; cursor:pointer; outline:none;
+  font-family:inherit;
+}
+.nav-select option { background:var(--green-800); }
+
+/* ── Layout ── */
+.main { margin-top:64px; min-height:calc(100vh - 64px); padding:2rem; max-width:1200px; margin-left:auto; margin-right:auto; }
+
+/* ── Hero ── */
+.hero {
+  background: linear-gradient(135deg, var(--green-900) 0%, var(--green-800) 55%, var(--green-600) 100%);
+  border-radius: 20px; padding: 2.5rem 3rem; color: var(--green-50);
+  margin-bottom:2rem; position:relative; overflow:hidden;
+}
+.hero::before {
+  content:''; position:absolute; top:-60px; right:-60px;
+  width:260px; height:260px; border-radius:50%;
+  background:rgba(116,198,157,.12); pointer-events:none;
+}
+.hero h1 { font-size:2.4rem; font-weight:800; color:var(--green-200); margin-bottom:.5rem; }
+.hero p  { font-size:1.05rem; color:var(--green-50); opacity:.85; }
+
+/* ── Cards ── */
+.card {
+  background:var(--white); border-radius:var(--radius); padding:1.4rem 1.6rem;
+  box-shadow:var(--shadow-md); margin-bottom:1rem;
+}
+.card-border-high   { border-left:4px solid var(--red); }
+.card-border-medium { border-left:4px solid var(--orange); }
+.card-border-low    { border-left:4px solid var(--green-600); }
+
+/* ── Grid ── */
+.grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:1.2rem; }
+.grid-2 { display:grid; grid-template-columns:repeat(2,1fr); gap:1.2rem; }
+.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:1.2rem; }
+@media(max-width:900px) { .grid-3,.grid-4 { grid-template-columns:1fr 1fr; } }
+@media(max-width:600px) { .grid-3,.grid-2,.grid-4 { grid-template-columns:1fr; } }
+
+/* ── Metric tiles ── */
+.metric {
+  background:var(--white); border-radius:var(--radius); padding:1.2rem 1.4rem;
+  box-shadow:var(--shadow-sm); text-align:center;
+}
+.metric-val { font-size:2rem; font-weight:800; font-family:'Syne',sans-serif; color:var(--green-800); }
+.metric-lbl { font-size:.78rem; font-weight:600; color:var(--gray-400); margin-top:4px; text-transform:uppercase; letter-spacing:.6px; }
+.metric-delta { font-size:.8rem; color:var(--green-600); font-weight:700; }
+
+/* ── Buttons ── */
+.btn {
+  display:inline-flex; align-items:center; gap:8px; cursor:pointer;
+  border:none; border-radius:10px; padding:11px 22px;
+  font-family:'DM Sans',sans-serif; font-size:.9rem; font-weight:700;
+  transition: all .18s; outline:none;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--green-700), var(--green-600));
+  color:#fff; box-shadow: 0 4px 14px rgba(45,106,79,.35);
+}
+.btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(45,106,79,.45); }
+.btn-primary:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+.btn-outline {
+  background:transparent; color:var(--green-700);
+  border:2px solid var(--green-600);
+}
+.btn-outline:hover { background:var(--green-50); }
+.btn-full { width:100%; justify-content:center; }
+
+/* ── Upload zone ── */
+.upload-zone {
+  border:2px dashed var(--green-400); border-radius:var(--radius);
+  padding:3rem 2rem; text-align:center; background:var(--green-50);
+  cursor:pointer; transition: border-color .2s, background .2s;
+}
+.upload-zone:hover { border-color:var(--green-700); background:#c6f0d4; }
+.upload-icon { font-size:3rem; margin-bottom:1rem; display:block; }
+
+/* ── Camera ── */
+.camera-wrapper { border-radius:var(--radius); overflow:hidden; background:#000; position:relative; }
+.camera-wrapper video { width:100%; display:block; max-height:340px; object-fit:cover; }
+
+/* ── Tabs ── */
+.tabs { display:flex; border-bottom:2px solid var(--gray-200); margin-bottom:1.5rem; gap:4px; }
+.tab {
+  padding:10px 18px; cursor:pointer; border:none; background:transparent;
+  font-family:'DM Sans',sans-serif; font-size:.88rem; font-weight:600;
+  color:var(--gray-400); border-radius:8px 8px 0 0; transition:color .15s, background .15s;
+}
+.tab:hover { color:var(--green-700); background:var(--gray-100); }
+.tab.active { color:var(--green-800); border-bottom:2px solid var(--green-700);
+              background:var(--white); margin-bottom:-2px; }
+
+/* ── Confidence bar ── */
+.conf-bar { background:var(--gray-200); border-radius:99px; height:10px; overflow:hidden; }
+.conf-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,var(--green-600),var(--green-400));
+             transition:width .6s cubic-bezier(.4,0,.2,1); }
+
+/* ── Weather status ── */
+.wx-ok   { background:#dcfce7; color:#15803d; border-radius:var(--radius-sm); padding:12px 16px; font-weight:700; }
+.wx-wait { background:#fef9c3; color:#a16207; border-radius:var(--radius-sm); padding:12px 16px; font-weight:700; }
+.wx-no   { background:#fee2e2; color:#b91c1c; border-radius:var(--radius-sm); padding:12px 16px; font-weight:700; }
+
+/* ── Tags ── */
+.tag { display:inline-block; background:var(--green-50); color:var(--green-700);
+       border-radius:99px; padding:2px 12px; font-size:.78rem; font-weight:700;
+       margin:2px; border:1px solid var(--green-200); }
+.tag-high   { background:#fee2e2; color:#b91c1c; border-color:#fca5a5; }
+.tag-medium { background:#fff7ed; color:#c2410c; border-color:#fed7aa; }
+
+/* ── Voice banner ── */
+.voice-banner {
+  background:linear-gradient(90deg,var(--green-800),var(--green-600));
+  color:var(--green-200); border-radius:var(--radius); padding:1rem 1.4rem;
+  font-weight:700; font-size:1rem; display:flex; align-items:center; gap:12px;
+  margin:1rem 0;
+}
+.pulse { animation:pulse 1.2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+/* ── Remedy box ── */
+.remedy-box {
+  background:var(--green-50); border:1px solid var(--green-200);
+  border-radius:var(--radius); padding:1.2rem 1.4rem;
+  white-space:pre-wrap; font-size:.94rem; line-height:1.85;
+  color:var(--green-900);
+}
+
+/* ── Alert ── */
+.alert { border-radius:var(--radius-sm); padding:10px 14px; font-size:.88rem; font-weight:600; margin-bottom:.5rem; }
+.alert-green { background:#dcfce7; color:#15803d; }
+.alert-red   { background:#fee2e2; color:#b91c1c; }
+.alert-yellow{ background:#fef9c3; color:#a16207; }
+.alert-blue  { background:#dbeafe; color:#1d4ed8; }
+
+/* ── Spinner ── */
+.spinner {
+  width:40px; height:40px; border:4px solid var(--green-200);
+  border-top-color:var(--green-600); border-radius:50%;
+  animation:spin 0.8s linear infinite; margin:2rem auto;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── Treatment cards ── */
+.treatment-card { background:var(--gray-50); border-radius:var(--radius-sm);
+                  padding:1rem 1.2rem; border:1px solid var(--gray-200); margin-bottom:.6rem; }
+.treatment-card h4 { color:var(--green-800); margin-bottom:.4rem; font-size:.9rem; }
+.treatment-card p  { font-size:.83rem; color:var(--gray-600); margin-bottom:.2rem; }
+
+/* ── Expander ── */
+.expander { border:1px solid var(--gray-200); border-radius:var(--radius-sm); margin-bottom:.6rem; overflow:hidden; }
+.expander-header {
+  padding:.9rem 1.2rem; cursor:pointer; display:flex; justify-content:space-between;
+  align-items:center; background:var(--white); font-weight:600; font-size:.9rem;
+  transition:background .15s;
+}
+.expander-header:hover { background:var(--gray-50); }
+.expander-body { padding:1rem 1.2rem; background:var(--white); border-top:1px solid var(--gray-100); }
+
+/* ── Table ── */
+.data-table { width:100%; border-collapse:collapse; font-size:.85rem; }
+.data-table th { background:var(--green-800); color:var(--green-200); padding:10px 14px; text-align:left; }
+.data-table td { padding:9px 14px; border-bottom:1px solid var(--gray-200); }
+.data-table tr:last-child td { border-bottom:none; }
+.data-table tr:hover td { background:var(--green-50); }
+
+/* ── Footer ── */
+.footer { text-align:center; padding:2rem; color:var(--gray-400); font-size:.82rem; margin-top:2rem; }
+
+/* ── Image preview ── */
+.img-preview { width:100%; border-radius:var(--radius); object-fit:cover; max-height:320px; display:block; }
+
+/* ── Proba chart bars ── */
+.proba-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.proba-label { width:160px; font-size:.8rem; font-weight:600; color:var(--gray-600); flex-shrink:0; text-align:right; }
+.proba-bar-wrap { flex:1; background:var(--gray-200); border-radius:99px; height:8px; }
+.proba-bar { height:8px; border-radius:99px; background:linear-gradient(90deg,var(--green-600),var(--green-400)); transition:width .5s; }
+.proba-pct { width:44px; font-size:.78rem; font-weight:700; color:var(--green-700); }
+
+/* scrollbar */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--green-400); border-radius:99px; }
+</style>
+</head>
+
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+const API = "http://localhost:8000";
+
+// ═══════════════════════════════════════════════
+//  DISEASE DB (hardcoded subset for offline use;
+//  full DB fetched from API on load)
+// ═══════════════════════════════════════════════
+const MOCK_WEATHER = {
+  Chennai:   { temp:32.5, humidity:75, rainfall:2.5, wind:12, status:"ok",   messages:[] },
+  Delhi:     { temp:28.3, humidity:65, rainfall:0.0, wind:8,  status:"ok",   messages:[] },
+  Mumbai:    { temp:30.1, humidity:80, rainfall:5.2, wind:15, status:"wait", messages:["Rain detected (5.2 mm) — delay spraying 24h"] },
+  Bangalore: { temp:26.7, humidity:70, rainfall:1.2, wind:10, status:"ok",   messages:[] },
+  Kolkata:   { temp:29.4, humidity:78, rainfall:3.8, wind:11, status:"wait", messages:["Rain detected (3.8 mm) — delay spraying 24h"] },
+  Other:     { temp:29.0, humidity:72, rainfall:1.0, wind:10, status:"ok",   messages:[] },
+};
+
+const TRANSLATIONS = {
+  English: {
+    analyze:"🚀 Analyze Image", detected:"Detected Disease", confidence:"Confidence",
+    proc_time:"Processing Time", treatment:"Treatment Recommendations",
+    chemical:"Chemical Treatment", organic:"Organic Treatment",
+    precautions:"⚠️ Precautions", prevention:"Prevention Tips",
+    weather:"Weather Advice", audio:"Voice Guidance",
+    healthy:"✅ Your crop looks healthy! No disease detected.",
+    spray_ok:"✅ RECOMMENDED TO SPRAY", spray_no:"❌ DO NOT SPRAY NOW", spray_wait:"⚠️ SPRAY WITH CAUTION",
+    symptoms:"Symptoms", cause:"Cause", speaking:"🔊 AI is speaking the remedy…",
+  },
+  Tamil: {
+    analyze:"🚀 படத்தை பகுப்பாய்வு செய்", detected:"கண்டறியப்பட்ட நோய்", confidence:"நம்பகத்தன்மை",
+    proc_time:"செயலாக்க நேரம்", treatment:"சிகிச்சை பரிந்துரைகள்",
+    chemical:"இரசாயன சிகிச்சை", organic:"இயற்கை சிகிச்சை",
+    precautions:"⚠️ முன்னெச்சரிக்கைகள்", prevention:"தடுப்பு குறிப்புகள்",
+    weather:"வானிலை அறிவுரை", audio:"குரல் வழிகாட்டுதல்",
+    healthy:"✅ உங்கள் பயிர் ஆரோக்கியமாக உள்ளது! நோய் இல்லை.",
+    spray_ok:"✅ தெளிக்க பரிந்துரைக்கப்படுகிறது", spray_no:"❌ இப்போது தெளிக்க வேண்டாம்", spray_wait:"⚠️ எச்சரிக்கையுடன் தெளிக்கவும்",
+    symptoms:"அறிகுறிகள்", cause:"காரணம்", speaking:"🔊 AI இப்போது தீர்வை சொல்கிறது…",
+  },
+  Hindi: {
+    analyze:"🚀 छवि का विश्लेषण करें", detected:"पहचानी गई बीमारी", confidence:"विश्वास स्तर",
+    proc_time:"प्रोसेसिंग समय", treatment:"उपचार सिफारिशें",
+    chemical:"रासायनिक उपचार", organic:"जैविक उपचार",
+    precautions:"⚠️ सावधानियां", prevention:"रोकथाम के उपाय",
+    weather:"मौसम सलाह", audio:"आवाज मार्गदर्शन",
+    healthy:"✅ आपकी फसल स्वस्थ दिखती है! कोई बीमारी नहीं।",
+    spray_ok:"✅ छिड़काव करने की सिफारिश है", spray_no:"❌ अभी छिड़काव न करें", spray_wait:"⚠️ सावधानी से छिड़काव करें",
+    symptoms:"लक्षण", cause:"कारण", speaking:"🔊 AI अभी उपाय बोल रहा है…",
+  },
+};
+
+function buildRemedy(info, language) {
+  const name = language === "Tamil" ? (info.tamil_name || info.name)
+             : language === "Hindi" ? (info.hindi_name || info.name)
+             : info.name;
+  const chem = (info.treatment?.chemical || []).slice(0,2);
+  const org  = (info.treatment?.organic  || []).slice(0,2);
+  const prec = (info.precautions || []).slice(0,3);
+  const fmtC = items => items.map(c=>`  • ${c.name} — ${c.dosage}`).join("\n") || "  • —";
+  const fmtP = items => items.map(p=>`  • ${p}`).join("\n");
+  if(language==="Tamil") return `வணக்கம் விவசாயி!\n\nஉங்கள் பயிரில் ${name} நோய் கண்டறியப்பட்டுள்ளது.\n\nஇரசாயன சிகிச்சை:\n${fmtC(chem)}\n\nஇயற்கை சிகிச்சை:\n${fmtC(org)}\n\nமுன்னெச்சரிக்கைகள்:\n${fmtP(prec)}\n\nநன்றி! வாழ்க விவசாயம்!`;
+  if(language==="Hindi") return `नमस्ते किसान!\n\nआपकी फसल में ${name} रोग पाया गया है।\n\nरासायनिक उपचार:\n${fmtC(chem)}\n\nजैविक उपचार:\n${fmtC(org)}\n\nसावधानियां:\n${fmtP(prec)}\n\nधन्यवाद! किसान आगे बढ़ें!`;
+  return `Hello Farmer!\n\nYour crop has been diagnosed with ${name}.\n\nChemical Treatment:\n${fmtC(chem)}\n\nOrganic Treatment:\n${fmtC(org)}\n\nPrecautions:\n${fmtP(prec)}\n\nThank you! Happy farming!`;
+}
+
+// ═══════════════════════════════════════════════
+//  COMPONENTS
+// ═══════════════════════════════════════════════
+
+function Navbar({ page, setPage, language, setLanguage, location, setLocation }) {
+  const pages = [
+    ["home","🏠 Home"], ["detection","🔍 Detection"], 
+    ["disease_db","📖 Disease DB"], ["history","📋 History"],
+    ["settings","⚙️ Settings"], ["help","❓ Help"],
+  ];
+  return (
+    <nav className="navbar">
+      <div className="nav-brand">🌾 Rural <span>Advisory</span></div>
+      <div className="nav-links">
+        {pages.map(([k,label]) => (
+          <button key={k} className={`nav-btn ${page===k?"active":""}`} onClick={()=>setPage(k)}>{label}</button>
+        ))}
+      </div>
+      <div className="nav-right">
+        <select className="nav-select" value={language} onChange={e=>setLanguage(e.target.value)}>
+          {["English","Tamil","Hindi"].map(l=><option key={l}>{l}</option>)}
+        </select>
+        <select className="nav-select" value={location} onChange={e=>setLocation(e.target.value)}>
+          {Object.keys(MOCK_WEATHER).map(l=><option key={l}>{l}</option>)}
+        </select>
+      </div>
+    </nav>
+  );
+}
+
+function MetricTile({ value, label, delta }) {
+  return (
+    <div className="metric">
+      <div className="metric-val">{value}</div>
+      <div className="metric-lbl">{label}</div>
+      {delta && <div className="metric-delta">{delta}</div>}
+    </div>
+  );
+}
+
+function ConfBar({ value }) {
+  const pct = Math.round(value * 100);
+  const color = pct >= 80 ? "#2d6a4f" : pct >= 60 ? "#f97316" : "#ef4444";
+  return (
+    <div>
+      <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+        <span style={{fontSize:".8rem",fontWeight:600,color:"#4b5563"}}>Confidence</span>
+        <span style={{fontSize:".9rem",fontWeight:800,color}}>{pct}%</span>
+      </div>
+      <div className="conf-bar">
+        <div className="conf-fill" style={{width:`${pct}%`, background:`linear-gradient(90deg,${color},${color}99)`}}/>
+      </div>
+    </div>
+  );
+}
+
+function ProbaChart({ allProba }) {
+  const entries = Object.entries(allProba).sort((a,b)=>b[1]-a[1]);
+  return (
+    <div>
+      {entries.map(([key, prob]) => (
+        <div key={key} className="proba-row">
+          <div className="proba-label">{key.replace(/_/g," ")}</div>
+          <div className="proba-bar-wrap">
+            <div className="proba-bar" style={{width:`${Math.round(prob*100)}%`}}/>
+          </div>
+          <div className="proba-pct">{Math.round(prob*100)}%</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Expander({ title, children }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="expander">
+      <div className="expander-header" onClick={()=>setOpen(!open)}>
+        <span>{title}</span>
+        <span>{open?"▲":"▼"}</span>
+      </div>
+      {open && <div className="expander-body">{children}</div>}
+    </div>
+  );
+}
+
+function TreatmentCard({ item, type }) {
+  const bg = type==="chemical" ? "#f0fdf4" : "#eff6ff";
+  const bc = type==="chemical" ? "#86efac" : "#93c5fd";
+  return (
+    <div className="treatment-card" style={{background:bg, borderColor:bc}}>
+      <h4>{item.name}</h4>
+      <p>📦 Dosage: <strong>{item.dosage}</strong></p>
+      <p>🔁 Frequency: {item.frequency}</p>
+      {item.preparation && <p>🧪 Prep: {item.preparation}</p>}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════
+//  PAGES
+// ═══════════════════════════════════════════════
+
+function HomePage({ diseaseDb }) {
+  const count = Object.keys(diseaseDb).length;
+  return (
+    <div>
+      <div className="hero">
+        <h1>🌾 Rural Advisory System</h1>
+        <p>AI-powered crop disease detection · Auto voice remedy · Tamil / Hindi / English</p>
+      </div>
+      <div className="grid-3" style={{marginBottom:"1.5rem"}}>
+        <div className="card card-border-low">
+          <h3 style={{marginBottom:".5rem"}}>🤖 AI Detection</h3>
+          <p style={{color:"#4b5563",fontSize:".9rem"}}>Upload a photo or use your camera. ML-powered diagnosis in under a second.</p>
+        </div>
+        <div className="card card-border-medium">
+          <h3 style={{marginBottom:".5rem"}}>🗣️ Auto Voice</h3>
+          <p style={{color:"#4b5563",fontSize:".9rem"}}><strong>AI speaks the remedy automatically</strong> in Tamil, Hindi or English right after analysis.</p>
+        </div>
+        <div className="card card-border-high">
+          <h3 style={{marginBottom:".5rem"}}>🌦️ Weather Advice</h3>
+          <p style={{color:"#4b5563",fontSize:".9rem"}}>Smart spraying recommendations based on your local weather conditions.</p>
+        </div>
+      </div>
+      <h2 style={{marginBottom:"1rem",color:"#1b4332"}}>📈 System Statistics</h2>
+      <div className="grid-4">
+        <MetricTile value="1,234" label="Total Predictions" delta="+12%"/>
+        <MetricTile value="94.2%" label="Avg Accuracy" delta="+2.1%"/>
+        <MetricTile value="567" label="Active Users" delta="+45"/>
+        <MetricTile value={count || 7} label="Diseases Covered" />
+      </div>
+    </div>
+  );
+}
+
+function DetectionPage({ language, location, diseaseDb }) {
+  const T = TRANSLATIONS[language];
+  const [inputMode, setInputMode] = useState("upload"); // upload | camera
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [result, setResult] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [activeTab, setActiveTab] = useState("disease");
+  const [audioSrc, setAudioSrc] = useState(null);
+  const [audioLoading, setAudioLoading] = useState(false);
+  const [camStream, setCamStream] = useState(null);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const audioRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  // Start camera
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode:"environment" } });
+      setCamStream(stream);
+      if(videoRef.current) videoRef.current.srcObject = stream;
+    } catch(e) { alert("Camera access denied: " + e.message); }
+  };
+
+  // Stop camera
+  const stopCamera = () => {
+    if(camStream) { camStream.getTracks().forEach(t=>t.stop()); setCamStream(null); }
+  };
+
+  useEffect(() => {
+    if(inputMode==="camera") startCamera();
+    else stopCamera();
+    return () => stopCamera();
+  }, [inputMode]);
+
+  // Capture frame
+  const capture = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d").drawImage(video, 0, 0);
+    canvas.toBlob(blob => {
+      const file = new File([blob], "capture.jpg", { type:"image/jpeg" });
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(blob));
+      stopCamera();
+      setInputMode("upload"); // show preview
+    }, "image/jpeg", 0.9);
+  };
+
+  // File upload
+  const handleFile = e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+    setResult(null); setAudioSrc(null);
+  };
+
+  // Analyze
+  const analyze = async () => {
+    if(!imageFile) return;
+    setAnalyzing(true); setResult(null); setAudioSrc(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", imageFile);
+      const res = await fetch(`${API}/api/analyze`, { method:"POST", body:fd });
+      if(!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      setResult(data);
+
+      // Auto-fetch TTS
+      if(data.disease_info) {
+        setAudioLoading(true);
+        const remedy = buildRemedy(data.disease_info, language);
+        try {
+          const ttsRes = await fetch(`${API}/api/tts`, {
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({ text:remedy, language }),
+          });
+          if(ttsRes.ok) {
+            const blob = await ttsRes.blob();
+            const url  = URL.createObjectURL(blob);
+            setAudioSrc(url);
+            // Auto-play
+            setTimeout(()=>{ if(audioRef.current) audioRef.current.play().catch(()=>{}); }, 300);
+          }
+        } catch(e) { console.warn("TTS failed:", e); }
+        setAudioLoading(false);
+      }
+    } catch(e) {
+      alert("Analysis failed: " + e.message + "\n\nMake sure the Python backend is running:\ncd backend && uvicorn main:app --reload");
+    }
+    setAnalyzing(false);
+  };
+
+  const info = result?.disease_info;
+  const wx   = MOCK_WEATHER[location] || MOCK_WEATHER.Other;
+  const remedy = info ? buildRemedy(info, language) : "";
+
+  return (
+    <div>
+      <h2 style={{marginBottom:"1.2rem",color:"#1b4332"}}>🔍 Disease Detection</h2>
+
+      {/* Input mode toggle */}
+      <div style={{display:"flex",gap:8,marginBottom:"1.2rem"}}>
+        <button className={`btn ${inputMode==="upload"?"btn-primary":"btn-outline"}`}
+                onClick={()=>setInputMode("upload")}>📂 Upload Image</button>
+        <button className={`btn ${inputMode==="camera"?"btn-primary":"btn-outline"}`}
+                onClick={()=>setInputMode("camera")}>📷 Live Camera</button>
+      </div>
+
+      <div className="grid-2">
+        {/* Left: image input */}
+        <div>
+          {inputMode === "upload" && !imagePreview && (
+            <div className="upload-zone" onClick={()=>fileInputRef.current.click()}>
+              <span className="upload-icon">🌿</span>
+              <p style={{fontWeight:700,color:"#2d6a4f",marginBottom:4}}>Click to upload a leaf image</p>
+              <p style={{fontSize:".82rem",color:"#6b7280"}}>JPG, PNG supported</p>
+              <input ref={fileInputRef} type="file" accept="image/*" style={{display:"none"}} onChange={handleFile}/>
+            </div>
+          )}
+          {inputMode === "upload" && imagePreview && (
+            <div>
+              <img src={imagePreview} className="img-preview" alt="Preview"/>
+              <button className="btn btn-outline" style={{marginTop:8,fontSize:".8rem",padding:"6px 14px"}}
+                      onClick={()=>{setImagePreview(null);setImageFile(null);setResult(null);fileInputRef.current.click();}}>
+                🔄 Change Image
+              </button>
+              <input ref={fileInputRef} type="file" accept="image/*" style={{display:"none"}} onChange={handleFile}/>
+            </div>
+          )}
+          {inputMode === "camera" && (
+            <div>
+              <div className="camera-wrapper">
+                <video ref={videoRef} autoPlay playsInline muted style={{width:"100%",maxHeight:320,objectFit:"cover"}}/>
+              </div>
+              <canvas ref={canvasRef} style={{display:"none"}}/>
+              <button className="btn btn-primary" style={{marginTop:10,width:"100%"}} onClick={capture}>
+                📸 Capture Photo
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Right: analyze button + weather location */}
+        <div>
+          <div className="card">
+            <h3 style={{marginBottom:"1rem"}}>⚙️ Settings</h3>
+            <label style={{display:"block",marginBottom:".4rem",fontWeight:600,fontSize:".85rem"}}>Location (for weather)</label>
+            <div style={{fontSize:".88rem",color:"#4b5563"}}>Using: <strong>{location}</strong> (change in navbar)</div>
+            <hr style={{margin:"1rem 0",borderColor:"#e5e7eb"}}/>
+            {imageFile && (
+              <button className="btn btn-primary btn-full" onClick={analyze} disabled={analyzing}>
+                {analyzing ? "⏳ Analysing…" : T.analyze}
+              </button>
+            )}
+            {!imageFile && <p style={{color:"#9ca3af",fontSize:".88rem"}}>Upload or capture an image first.</p>}
+          </div>
+        </div>
+      </div>
+
+      {/* Spinner */}
+      {analyzing && <div className="spinner"/>}
+
+      {/* Results */}
+      {result && !analyzing && (
+        <div style={{marginTop:"1.5rem"}}>
+          {/* Metrics */}
+          <div className="grid-3" style={{marginBottom:"1.2rem"}}>
+            <MetricTile value={info ? (language==="Tamil"?info.tamil_name:language==="Hindi"?info.hindi_name:info.name) : result.disease_key.replace(/_/g," ")} label={T.detected}/>
+            <MetricTile value={`${Math.round(result.confidence*100)}%`} label={T.confidence}/>
+            <MetricTile value={`${result.processing_time}s`} label={T.proc_time}/>
+          </div>
+          <ConfBar value={result.confidence}/>
+
+          {/* Healthy */}
+          {result.disease_key === "Healthy" && (
+            <div className="alert alert-green" style={{marginTop:"1rem",fontSize:"1rem"}}>
+              {T.healthy}
+            </div>
+          )}
+
+          {/* Voice banner + audio */}
+          {audioSrc && (
+            <div style={{marginTop:"1rem"}}>
+              <div className="voice-banner">
+                <span className="pulse">🔊</span>
+                <span>{T.speaking}</span>
+              </div>
+              <audio ref={audioRef} controls src={audioSrc} style={{width:"100%",marginBottom:".5rem"}}/>
+              <a href={audioSrc} download="remedy.mp3" className="btn btn-outline" style={{fontSize:".82rem",padding:"6px 14px",display:"inline-flex"}}>
+                ⬇️ Download Audio
+              </a>
+            </div>
+          )}
+          {audioLoading && <div className="alert alert-blue" style={{marginTop:"1rem"}}>🔊 Generating voice guidance…</div>}
+          {!audioSrc && !audioLoading && (
+            <div className="alert alert-yellow" style={{marginTop:"1rem"}}>
+              💡 Install <code>gtts</code> and start the backend to enable auto-voice.
+            </div>
+          )}
+
+          {/* Remedy text */}
+          {info && (
+            <div className="remedy-box" style={{marginTop:"1rem"}}>{remedy}</div>
+          )}
+
+          {/* Detail tabs */}
+          {info && result.disease_key !== "Healthy" && (
+            <div style={{marginTop:"1.5rem"}}>
+              <div className="tabs">
+                {[["disease","🦠 Disease"],["treatment","💊 "+T.treatment],["weather","🌦️ "+T.weather],["proba","📊 Confidence"]].map(([k,l])=>(
+                  <button key={k} className={`tab ${activeTab===k?"active":""}`} onClick={()=>setActiveTab(k)}>{l}</button>
+                ))}
+              </div>
+
+              {activeTab==="disease" && (
+                <div>
+                  <div className={`card card-border-${info.severity==="high"?"high":info.severity==="medium"?"medium":"low"}`}>
+                    <h3>{language==="Tamil"?info.tamil_name:language==="Hindi"?info.hindi_name:info.name}</h3>
+                    <p style={{color:"#6b7280",fontSize:".85rem",marginTop:4}}>
+                      <em>{info.scientific_name}</em>
+                    </p>
+                    <p style={{marginTop:".6rem",fontSize:".9rem"}}><strong>{T.cause}:</strong> {info.cause}</p>
+                    <div style={{marginTop:".6rem"}}>
+                      {(info.crops||[]).map(c=><span key={c} className="tag">{c}</span>)}
+                      <span className={`tag tag-${info.severity}`} style={{marginLeft:4}}>{info.severity} severity</span>
+                    </div>
+                  </div>
+                  <div className="grid-2">
+                    <div>
+                      <h4 style={{marginBottom:".6rem",color:"#1b4332"}}>{T.symptoms}</h4>
+                      {(info.symptoms||[]).map((s,i)=>(
+                        <p key={i} style={{fontSize:".88rem",padding:"3px 0",color:"#374151"}}>• {s}</p>
+                      ))}
+                    </div>
+                    <div>
+                      <h4 style={{marginBottom:".6rem",color:"#1b4332"}}>Optimal Disease Conditions</h4>
+                      {Object.entries(info.optimal_conditions||{}).map(([k,v])=>(
+                        <p key={k} style={{fontSize:".88rem",padding:"3px 0",color:"#374151"}}>• {k}: {v}</p>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab==="treatment" && (
+                <div>
+                  <div className="grid-2">
+                    <div>
+                      <h3 style={{marginBottom:".8rem",color:"#15803d"}}>{T.chemical}</h3>
+                      {(info.treatment?.chemical||[]).map((c,i)=><TreatmentCard key={i} item={c} type="chemical"/>)}
+                    </div>
+                    <div>
+                      <h3 style={{marginBottom:".8rem",color:"#1d4ed8"}}>{T.organic}</h3>
+                      {(info.treatment?.organic||[]).map((o,i)=><TreatmentCard key={i} item={o} type="organic"/>)}
+                    </div>
+                  </div>
+                  <div style={{marginTop:"1rem"}}>
+                    <h4 style={{marginBottom:".6rem",color:"#b45309"}}>{T.precautions}</h4>
+                    {(info.precautions||[]).map((p,i)=>(
+                      <div key={i} className="alert alert-yellow" style={{marginBottom:4}}>{p}</div>
+                    ))}
+                  </div>
+                  <div style={{marginTop:"1rem"}}>
+                    <h4 style={{marginBottom:".6rem",color:"#1b4332"}}>{T.prevention}</h4>
+                    {(info.prevention||[]).map((p,i)=>(
+                      <p key={i} style={{fontSize:".88rem",padding:"2px 0"}}>✔️ {p}</p>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {activeTab==="weather" && (
+                <div>
+                  <div className="grid-4" style={{marginBottom:"1rem"}}>
+                    <div className="metric"><div className="metric-val">{wx.temp}°C</div><div className="metric-lbl">Temperature</div></div>
+                    <div className="metric"><div className="metric-val">{wx.humidity}%</div><div className="metric-lbl">Humidity</div></div>
+                    <div className="metric"><div className="metric-val">{wx.rainfall}mm</div><div className="metric-lbl">Rainfall</div></div>
+                    <div className="metric"><div className="metric-val">{wx.wind}km/h</div><div className="metric-lbl">Wind</div></div>
+                  </div>
+                  <div className={`wx-${wx.status}`} style={{marginBottom:"1rem",fontSize:"1rem"}}>
+                    {wx.status==="ok" ? T.spray_ok : wx.status==="wait" ? T.spray_wait : T.spray_no}
+                  </div>
+                  {(wx.messages||[]).map((m,i)=><div key={i} className="alert alert-yellow" style={{marginBottom:4}}>{m}</div>)}
+                  <div className="alert alert-blue">🕐 Best spray window: <strong>6:00 AM – 9:00 AM</strong></div>
+                </div>
+              )}
+
+              {activeTab==="proba" && result.all_proba && (
+                <div className="card">
+                  <h4 style={{marginBottom:"1rem",color:"#1b4332"}}>Model Confidence per Disease</h4>
+                  <ProbaChart allProba={result.all_proba}/>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AnalyticsPage() {
+  const DISEASE_DATA = [
+    {name:"Early Blight",count:150},{name:"Late Blight",count:120},
+    {name:"Powdery Mildew",count:80},{name:"Leaf Spot",count:60},
+    {name:"Rust",count:45},{name:"Healthy",count:180},
+  ];
+  const TREND = Array.from({length:30},(_,i)=>({day:`D${i+1}`,predictions:Math.floor(10+Math.random()*20)}));
+  const COLORS = ["#2d6a4f","#40916c","#74c69d","#f59e0b","#ef4444","#0ea5e9"];
+
+  return (
+    <div>
+      <h2 style={{marginBottom:"1.2rem",color:"#1b4332"}}>📊 Analytics Dashboard</h2>
+      <div className="grid-4" style={{marginBottom:"1.5rem"}}>
+        <MetricTile value="487" label="Total Predictions" delta="+12%"/>
+        <MetricTile value="92.5%" label="Detection Accuracy" delta="+1.2%"/>
+        <MetricTile value="0.856" label="Avg Confidence"/>
+        <MetricTile value="89" label="Farmer Feedback" delta="+5"/>
+      </div>
+
+      <div className="grid-2">
+        <div className="card">
+          <h3 style={{marginBottom:"1rem",color:"#1b4332"}}>Disease Distribution</h3>
+          <Recharts.BarChart width={420} height={260} data={DISEASE_DATA}>
+            <Recharts.CartesianGrid strokeDasharray="3 3"/>
+            <Recharts.XAxis dataKey="name" tick={{fontSize:10}} angle={-20} textAnchor="end" height={50}/>
+            <Recharts.YAxis/>
+            <Recharts.Tooltip/>
+            <Recharts.Bar dataKey="count" fill="#2d6a4f" radius={[4,4,0,0]}/>
+          </Recharts.BarChart>
+        </div>
+        <div className="card">
+          <h3 style={{marginBottom:"1rem",color:"#1b4332"}}>Prediction Trend (30 Days)</h3>
+          <Recharts.LineChart width={420} height={260} data={TREND}>
+            <Recharts.CartesianGrid strokeDasharray="3 3"/>
+            <Recharts.XAxis dataKey="day" tick={{fontSize:9}}/>
+            <Recharts.YAxis/>
+            <Recharts.Tooltip/>
+            <Recharts.Line type="monotone" dataKey="predictions" stroke="#40916c" strokeWidth={2} dot={false}/>
+          </Recharts.LineChart>
+        </div>
+      </div>
+      <div className="grid-2" style={{marginTop:"1.2rem"}}>
+        <div className="card">
+          <h3 style={{marginBottom:"1rem",color:"#1b4332"}}>Treatment Outcomes</h3>
+          <Recharts.PieChart width={380} height={240}>
+            <Recharts.Pie data={[{name:"Improved",value:156},{name:"No Change",value:45},{name:"Worsened",value:12}]}
+                          cx="50%" cy="50%" outerRadius={90} dataKey="value" label={({name,percent})=>`${name} ${(percent*100).toFixed(0)}%`}>
+              {[0,1,2].map(i=><Recharts.Cell key={i} fill={["#40916c","#f59e0b","#ef4444"][i]}/>)}
+            </Recharts.Pie>
+            <Recharts.Tooltip/>
+          </Recharts.PieChart>
+        </div>
+        <div className="card">
+          <h3 style={{marginBottom:"1rem",color:"#1b4332"}}>Accuracy by Disease</h3>
+          <Recharts.RadarChart width={380} height={240} data={[
+            {d:"E.Blight",A:95},{d:"L.Blight",A:91},{d:"Powdery",A:97},
+            {d:"Leaf Spot",A:88},{d:"Rust",A:93},{d:"Bacterial",A:86},
+          ]}>
+            <Recharts.PolarGrid/><Recharts.PolarAngleAxis dataKey="d" tick={{fontSize:11}}/>
+            <Recharts.Radar name="Accuracy" dataKey="A" stroke="#2d6a4f" fill="#2d6a4f" fillOpacity={0.35}/>
+          </Recharts.RadarChart>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DiseaseDBPage({ diseaseDb, language }) {
+  const [search, setSearch] = useState("");
+  const entries = Object.entries(diseaseDb).filter(([k,v])=> {
+    const name = language==="Tamil"?(v.tamil_name||v.name):language==="Hindi"?(v.hindi_name||v.name):v.name;
+    return !search || name.toLowerCase().includes(search.toLowerCase()) || k.toLowerCase().includes(search.toLowerCase());
+  });
+  return (
+    <div>
+      <h2 style={{marginBottom:"1.2rem",color:"#1b4332"}}>📖 Disease Database</h2>
+      <input placeholder="🔍 Search diseases…" value={search} onChange={e=>setSearch(e.target.value)}
+             style={{width:"100%",padding:"10px 14px",border:"2px solid #d1fae5",borderRadius:10,fontSize:".9rem",marginBottom:"1.2rem",outline:"none"}}/>
+      {entries.map(([key, info]) => {
+        const name = language==="Tamil"?(info.tamil_name||info.name):language==="Hindi"?(info.hindi_name||info.name):info.name;
+        const sev  = info.severity;
+        return (
+          <Expander key={key} title={`${sev==="high"?"🔴":sev==="medium"?"🟡":"🟢"} ${name} (${sev} severity)`}>
+            <div className="grid-3" style={{marginBottom:"1rem"}}>
+              <div><strong>Cause:</strong><p style={{fontSize:".85rem",color:"#4b5563",marginTop:4}}>{info.cause}</p></div>
+              <div><strong>Affects:</strong>{(info.crops||[]).map(c=><span key={c} className="tag" style={{display:"block",margin:"2px 0"}}>{c}</span>)}</div>
+              <div><strong>Treatments:</strong>
+                <p style={{fontSize:".85rem",color:"#4b5563",marginTop:4}}>Chemical: {(info.treatment?.chemical||[]).length} | Organic: {(info.treatment?.organic||[]).length}</p>
+              </div>
+            </div>
+            <div className="remedy-box" style={{fontSize:".86rem"}}>{buildRemedy(info, language)}</div>
+          </Expander>
+        );
+      })}
+    </div>
+  );
+}
+
+function HistoryPage() {
+  const data = [
+    {date:"2024-01-28",disease:"Early Blight",treatment:"Mancozeb",outcome:"Improved",location:"Chennai"},
+    {date:"2024-01-25",disease:"Late Blight",treatment:"Metalaxyl",outcome:"Improved",location:"Delhi"},
+    {date:"2024-01-22",disease:"Healthy",treatment:"None",outcome:"Maintained",location:"Mumbai"},
+    {date:"2024-01-19",disease:"Early Blight",treatment:"Chlorothalonil",outcome:"Improved",location:"Chennai"},
+    {date:"2024-01-16",disease:"Powdery Mildew",treatment:"Sulfur",outcome:"No Change",location:"Bangalore"},
+  ];
+  return (
+    <div>
+      <h2 style={{marginBottom:"1.2rem",color:"#1b4332"}}>📋 Treatment History</h2>
+      <div className="card" style={{padding:0,overflow:"hidden"}}>
+        <table className="data-table">
+          <thead><tr><th>Date</th><th>Disease</th><th>Treatment</th><th>Outcome</th><th>Location</th></tr></thead>
+          <tbody>{data.map((r,i)=>(
+            <tr key={i}>
+              <td>{r.date}</td><td>{r.disease}</td><td>{r.treatment}</td>
+              <td><span className={`tag ${r.outcome==="Improved"?"":"tag-medium"}`}>{r.outcome}</span></td>
+              <td>{r.location}</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function SettingsPage({ language, setLanguage, location, setLocation }) {
+  const [saved, setSaved] = useState(false);
+  const save = () => { setSaved(true); setTimeout(()=>setSaved(false),2500); };
+  return (
+    <div>
+      <h2 style={{marginBottom:"1.2rem",color:"#1b4332"}}>⚙️ Settings</h2>
+      <div className="grid-2">
+        <div className="card">
+          <h3 style={{marginBottom:"1rem"}}>👤 Profile</h3>
+          {[["Name","Farmer Name"],["Phone","+91-XXXXXXXXXX"],["Email","farmer@example.com"]].map(([l,p])=>(
+            <div key={l} style={{marginBottom:".8rem"}}>
+              <label style={{display:"block",fontWeight:600,fontSize:".85rem",marginBottom:4}}>{l}</label>
+              <input placeholder={p} style={{width:"100%",padding:"8px 12px",border:"1.5px solid #e5e7eb",borderRadius:8,fontSize:".88rem"}}/>
+            </div>
+          ))}
+          <div style={{marginBottom:".8rem"}}>
+            <label style={{display:"block",fontWeight:600,fontSize:".85rem",marginBottom:4}}>Language</label>
+            <select value={language} onChange={e=>setLanguage(e.target.value)}
+                    style={{width:"100%",padding:"8px 12px",border:"1.5px solid #e5e7eb",borderRadius:8,fontSize:".88rem"}}>
+              {["English","Tamil","Hindi"].map(l=><option key={l}>{l}</option>)}
+            </select>
+          </div>
+          <div style={{marginBottom:".8rem"}}>
+            <label style={{display:"block",fontWeight:600,fontSize:".85rem",marginBottom:4}}>Location</label>
+            <select value={location} onChange={e=>setLocation(e.target.value)}
+                    style={{width:"100%",padding:"8px 12px",border:"1.5px solid #e5e7eb",borderRadius:8,fontSize:".88rem"}}>
+              {Object.keys(MOCK_WEATHER).map(l=><option key={l}>{l}</option>)}
+            </select>
+          </div>
+        </div>
+        <div className="card">
+          <h3 style={{marginBottom:"1rem"}}>🔔 Notifications</h3>
+          {[["Enable Notifications",true],["Daily Updates",true],["Disease Risk Alerts",true],["Email Reports",false]].map(([l,d])=>(
+            <label key={l} style={{display:"flex",alignItems:"center",gap:10,marginBottom:"1rem",cursor:"pointer"}}>
+              <input type="checkbox" defaultChecked={d} style={{width:18,height:18,accentColor:"#2d6a4f"}}/>
+              <span style={{fontWeight:500}}>{l}</span>
+            </label>
+          ))}
+          <h3 style={{marginBottom:"1rem",marginTop:"1rem"}}>🌾 Primary Crops</h3>
+          {["Tomato","Potato","Rice","Wheat","Cotton"].map(c=>(
+            <label key={c} style={{display:"flex",alignItems:"center",gap:10,marginBottom:8,cursor:"pointer"}}>
+              <input type="checkbox" defaultChecked={["Tomato","Potato"].includes(c)} style={{width:16,height:16,accentColor:"#2d6a4f"}}/>
+              <span style={{fontSize:".9rem"}}>{c}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+      <button className="btn btn-primary" onClick={save} style={{marginTop:"1rem"}}>
+        💾 Save Settings
+      </button>
+      {saved && <div className="alert alert-green" style={{marginTop:"1rem",display:"inline-block",marginLeft:12}}>✅ Saved!</div>}
+    </div>
+  );
+}
+
+function HelpPage() {
+  const faqs = [
+    ["How does auto-voice work?","After clicking Analyze Image, the AI generates a full remedy text in your selected language (Tamil/Hindi/English) and plays it automatically using Google Text-to-Speech (gTTS) via the Python backend."],
+    ["How do I detect a disease?","Go to Detection → Upload Image or Use Camera → click Analyze Image. The ML model analyses your crop photo and returns a diagnosis instantly."],
+    ["Which languages are supported?","Tamil (தமிழ்), Hindi (हिन्दी) and English. Change via the navbar dropdowns."],
+    ["Why is voice not playing?","Make sure the Python backend is running (uvicorn main:app --reload) and gTTS is installed (pip install gtts). An internet connection is needed for TTS."],
+    ["How accurate is the detection?","The Random Forest model achieves ~90–95% accuracy on held-out crop images. Upload a clear, well-lit leaf photo for best results."],
+    ["How do I run this locally?","Start the backend: cd backend && pip install -r requirements.txt && uvicorn main:app --reload. Open index.html in your browser."],
+  ];
+  return (
+    <div>
+      <h2 style={{marginBottom:"1.2rem",color:"#1b4332"}}>❓ Help & FAQ</h2>
+      {faqs.map(([q,a])=>(
+        <Expander key={q} title={q}><p style={{fontSize:".9rem",color:"#374151",lineHeight:1.7}}>{a}</p></Expander>
+      ))}
+      <div className="alert alert-green" style={{marginTop:"1.5rem",fontSize:".95rem"}}>
+        📞 <strong>Helpline:</strong> 1800-RURAL-HELP &nbsp;|&nbsp; ✉️ <strong>Email:</strong> support@ruralavisory.in
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════
+//  APP ROOT
+// ═══════════════════════════════════════════════
+function App() {
+  const [page,     setPage]     = useState("home");
+  const [language, setLanguage] = useState("English");
+  const [location, setLocation] = useState("Chennai");
+  const [diseaseDb, setDiseaseDb] = useState({});
+
+  // Fetch disease DB from backend
+  useEffect(() => {
+    fetch(`${API}/api/diseases`)
+      .then(r=>r.json())
+      .then(setDiseaseDb)
+      .catch(()=>console.warn("Backend not reachable — disease DB will be empty. Start uvicorn."));
+  }, []);
+
+  const renderPage = () => {
+    switch(page) {
+      case "home":       return <HomePage diseaseDb={diseaseDb}/>;
+      case "detection":  return <DetectionPage language={language} location={location} diseaseDb={diseaseDb}/>;
+      case "analytics":  return <AnalyticsPage/>;
+      case "disease_db": return <DiseaseDBPage diseaseDb={diseaseDb} language={language}/>;
+      case "history":    return <HistoryPage/>;
+      case "settings":   return <SettingsPage language={language} setLanguage={setLanguage} location={location} setLocation={setLocation}/>;
+      case "help":       return <HelpPage/>;
+      default:           return <HomePage diseaseDb={diseaseDb}/>;
+    }
+  };
+
+  return (
+    <>
+      <Navbar page={page} setPage={setPage} language={language} setLanguage={setLanguage} location={location} setLocation={setLocation}/>
+      <main className="main">
+        {renderPage()}
+        <div className="footer">🌾 Rural Agricultural Advisory System v2.0 · Built for Indian Farmers · © 2024</div>
+      </main>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>

@@ -1,0 +1,541 @@
+{
+  "Early_Blight": {
+    "id": "early_blight_001",
+    "name": "Early Blight",
+    "tamil_name": "ஆரம்ப புல்லி நோய்",
+    "hindi_name": "प्रारंभिक झुलसा",
+    "scientific_name": "Alternaria solani",
+    "crops": ["tomato", "potato", "eggplant"],
+    "severity": "medium",
+    "prevalence": "common",
+    "cause": "Fungal infection (Alternaria solani) thrives in warm, humid weather",
+    "symptoms": [
+      "Brown circular spots on lower leaves",
+      "Concentric rings (target-like appearance)",
+      "Yellowing around affected areas",
+      "Premature leaf drop",
+      "Spots may coalesce affecting large leaf areas"
+    ],
+    "optimal_conditions": {
+      "temperature": "20-25°C",
+      "humidity": "85-95%",
+      "rainfall": "2-5mm",
+      "wind_speed": "5-15 km/h"
+    },
+    "treatment": {
+      "chemical": [
+        {
+          "name": "Mancozeb 75% WP",
+          "dosage": "2.5-3 gm per liter",
+          "frequency": "Every 7-10 days",
+          "concentration": "0.3%"
+        },
+        {
+          "name": "Chlorothalonil 75% WP",
+          "dosage": "2 gm per liter",
+          "frequency": "Every 7-10 days",
+          "concentration": "0.25%"
+        },
+        {
+          "name": "Copper Oxychloride 50% WP",
+          "dosage": "2.5 gm per liter",
+          "frequency": "Every 10-14 days",
+          "concentration": "0.25%"
+        }
+      ],
+      "organic": [
+        {
+          "name": "Bordeaux Mixture 1%",
+          "dosage": "10 ml per liter",
+          "frequency": "Every 7-10 days",
+          "preparation": "Mix 10gm copper sulphate + 10gm lime per liter"
+        },
+        {
+          "name": "Neem Oil Spray 3%",
+          "dosage": "30 ml per liter with soap",
+          "frequency": "Every 10-14 days",
+          "preparation": "Mix with liquid soap for better adherence"
+        },
+        {
+          "name": "Baking Soda Spray",
+          "dosage": "1 spoon per liter",
+          "frequency": "Every 7 days",
+          "preparation": "Mix with oil and soap solution"
+        }
+      ]
+    },
+    "precautions": [
+      "Spray in early morning (6-9 AM) or late evening (4-7 PM)",
+      "Avoid spraying during rain or high wind",
+      "Do not spray within 10 days of harvest",
+      "Remove affected leaves immediately and burn",
+      "Maintain field sanitation",
+      "Improve air circulation by pruning lower leaves",
+      "Avoid overhead irrigation",
+      "Use disease-free seeds",
+      "Wear protective gear (gloves, mask, goggles)",
+      "Allow 7-10 days between chemical and organic sprays"
+    ],
+    "prevention": [
+      "Plant resistant varieties",
+      "Maintain 60cm spacing between rows",
+      "Use drip irrigation instead of overhead",
+      "Remove volunteer plants",
+      "Practice crop rotation (3-4 years)",
+      "Mulch around plants",
+      "Clean equipment after each use"
+    ],
+    "spray_schedule": [
+      "Week 2: First preventive spray",
+      "Week 3: Second spray",
+      "Week 4-6: Spray every 7-10 days based on weather",
+      "Increase frequency during high humidity"
+    ]
+  },
+  "Late_Blight": {
+    "id": "late_blight_001",
+    "name": "Late Blight",
+    "tamil_name": "தாமதமான புல்லி நோய்",
+    "hindi_name": "पछेती झुलसा",
+    "scientific_name": "Phytophthora infestans",
+    "crops": ["tomato", "potato"],
+    "severity": "high",
+    "prevalence": "common",
+    "cause": "Oomycete (water mold) pathogen spreads rapidly in cool, wet conditions",
+    "symptoms": [
+      "Water-soaked spots on leaves and stems",
+      "White mold on leaf undersides",
+      "Rapid plant death within days",
+      "Dark rot on tubers",
+      "Spots appear on fruit as circular, greasy lesions",
+      "Stems become dark and hollow"
+    ],
+    "optimal_conditions": {
+      "temperature": "13-18°C",
+      "humidity": ">90%",
+      "rainfall": ">5mm",
+      "wind_speed": "0-10 km/h"
+    },
+    "treatment": {
+      "chemical": [
+        {
+          "name": "Metalaxyl 8% + Mancozeb 64% WP",
+          "dosage": "2.5 gm per liter",
+          "frequency": "Every 5-7 days",
+          "concentration": "0.25%"
+        },
+        {
+          "name": "Fosetyl-Al 80% WP",
+          "dosage": "2 gm per liter",
+          "frequency": "Every 7-10 days",
+          "concentration": "0.2%"
+        },
+        {
+          "name": "Cymoxanil 8% + Mancozeb 64%",
+          "dosage": "2.5 gm per liter",
+          "frequency": "Every 5-7 days",
+          "concentration": "0.25%"
+        }
+      ],
+      "organic": [
+        {
+          "name": "Bordeaux Mixture 1%",
+          "dosage": "10 ml per liter",
+          "frequency": "Every 5-7 days",
+          "preparation": "Critical in cool, wet weather"
+        },
+        {
+          "name": "Copper Oxychloride 50% WP",
+          "dosage": "2.5 gm per liter",
+          "frequency": "Every 7 days",
+          "preparation": "Very effective against oomycetes"
+        },
+        {
+          "name": "Potassium Permanganate",
+          "dosage": "2 gm per liter",
+          "frequency": "Every 7-10 days",
+          "preparation": "Disinfectant spray"
+        }
+      ]
+    },
+    "precautions": [
+      "CRITICAL in cool, wet weather (13-18°C)",
+      "Start preventive sprays BEFORE disease appears",
+      "Improve field drainage immediately",
+      "Avoid overhead irrigation completely",
+      "Rotate crops annually (never plant tomato/potato consecutively)",
+      "Use certified disease-free seed potatoes",
+      "Remove volunteer potato plants",
+      "Do not harvest during wet conditions",
+      "Ensure proper air circulation around plants",
+      "Disinfect equipment thoroughly"
+    ],
+    "prevention": [
+      "Plant only certified disease-free seeds",
+      "Choose disease-resistant varieties (highly recommended)",
+      "Maintain 4-5 year crop rotation",
+      "Remove and destroy infected plant material immediately",
+      "Use drip or furrow irrigation",
+      "Proper drainage in fields",
+      "Adequate plant spacing",
+      "Monitor weather forecasts"
+    ],
+    "spray_schedule": [
+      "Week 1-2: Two preventive sprays at 5-day intervals",
+      "Week 3+: Spray every 5-7 days if cool and wet",
+      "Continue until 2-3 weeks before harvest",
+      "Increase frequency during monsoon season"
+    ]
+  },
+  "Powdery_Mildew": {
+    "id": "powdery_mildew_001",
+    "name": "Powdery Mildew",
+    "tamil_name": "பூ வெண்பூசணம்",
+    "hindi_name": "पाउडरी मिल्ड्यू",
+    "scientific_name": "Erysiphe spp.",
+    "crops": ["wheat", "rice", "barley", "grape", "melon"],
+    "severity": "medium",
+    "prevalence": "very_common",
+    "cause": "Fungal infection thrives in warm, dry weather with poor air circulation",
+    "symptoms": [
+      "White powdery coating on leaves",
+      "Initially on lower leaves, spreads upward",
+      "Stunted plant growth",
+      "Leaf yellowing",
+      "Reduced grain/fruit quality",
+      "Premature leaf senescence"
+    ],
+    "optimal_conditions": {
+      "temperature": "15-25°C",
+      "humidity": "60-85%",
+      "rainfall": "low to moderate",
+      "wind_speed": "5-10 km/h"
+    },
+    "treatment": {
+      "chemical": [
+        {
+          "name": "Sulfur 80% WP",
+          "dosage": "2-2.5 gm per liter",
+          "frequency": "Every 10-14 days",
+          "concentration": "0.2%"
+        },
+        {
+          "name": "Wettable Sulfur",
+          "dosage": "2 gm per liter",
+          "frequency": "Every 10 days",
+          "concentration": "0.2%"
+        },
+        {
+          "name": "Triazole Fungicides",
+          "dosage": "1 ml per liter",
+          "frequency": "Every 14 days",
+          "concentration": "0.1%"
+        }
+      ],
+      "organic": [
+        {
+          "name": "Sulfur Dusting",
+          "dosage": "25 kg per hectare",
+          "frequency": "Every 10-14 days",
+          "preparation": "Best in early morning"
+        },
+        {
+          "name": "Neem Oil 3%",
+          "dosage": "30 ml per liter",
+          "frequency": "Every 14 days",
+          "preparation": "Add soap for better coverage"
+        },
+        {
+          "name": "Baking Soda Solution",
+          "dosage": "1 spoon + 1 ml oil per liter",
+          "frequency": "Every 7-10 days",
+          "preparation": "Most economical option"
+        }
+      ]
+    },
+    "precautions": [
+      "Spray during cool parts of day",
+      "Avoid spraying sulfur when temperature > 30°C",
+      "Do not mix sulfur with other chemicals",
+      "Improve field air circulation by pruning",
+      "Avoid excessive nitrogen fertilization",
+      "Space plants properly",
+      "Avoid overhead irrigation",
+      "Remove affected plant parts",
+      "Ensure proper light penetration"
+    ],
+    "prevention": [
+      "Select resistant varieties",
+      "Maintain proper plant spacing",
+      "Adequate irrigation (not overhead)",
+      "Avoid dense plantings",
+      "Remove weeds",
+      "Proper fertilization (not excessive N)",
+      "Monitor regularly",
+      "Start preventive sprays early"
+    ]
+  },
+  "Leaf_Spot": {
+    "id": "leaf_spot_001",
+    "name": "Leaf Spot",
+    "tamil_name": "இலை நோய்",
+    "hindi_name": "पत्ती धब्बा",
+    "scientific_name": "Various Cercospora, Septoria, Colletotrichum species",
+    "crops": ["rice", "wheat", "maize", "cotton", "vegetables"],
+    "severity": "low_to_medium",
+    "prevalence": "common",
+    "cause": "Multiple fungal pathogens causing spotting on leaves",
+    "symptoms": [
+      "Dark brown or black spots on leaves",
+      "Spots often have concentric rings or halos",
+      "Spots may have yellow borders",
+      "Leaves gradually yellow and fall",
+      "Can affect stems and pods"
+    ],
+    "optimal_conditions": {
+      "temperature": "20-28°C",
+      "humidity": "80-90%",
+      "rainfall": "2-4mm",
+      "wind_speed": "5-15 km/h"
+    },
+    "treatment": {
+      "chemical": [
+        {
+          "name": "Mancozeb 75% WP",
+          "dosage": "2-2.5 gm per liter",
+          "frequency": "Every 10-14 days",
+          "concentration": "0.2-0.25%"
+        },
+        {
+          "name": "Carbendazim 50% WP",
+          "dosage": "1-1.5 gm per liter",
+          "frequency": "Every 14 days",
+          "concentration": "0.1-0.15%"
+        }
+      ],
+      "organic": [
+        {
+          "name": "Bordeaux Mixture 1%",
+          "dosage": "10 ml per liter",
+          "frequency": "Every 10-14 days",
+          "preparation": "Traditional and effective"
+        },
+        {
+          "name": "Neem Oil 3%",
+          "dosage": "30 ml per liter",
+          "frequency": "Every 14 days",
+          "preparation": "With soap solution"
+        }
+      ]
+    },
+    "precautions": [
+      "Remove affected leaves and debris",
+      "Maintain good drainage",
+      "Improve air circulation",
+      "Avoid overhead watering",
+      "Space plants properly",
+      "Disinfect tools between plants",
+      "Monitor regularly for early detection"
+    ],
+    "prevention": [
+      "Use resistant varieties",
+      "Maintain crop hygiene",
+      "Proper spacing",
+      "Adequate ventilation",
+      "Drip irrigation preferred",
+      "Avoid overhead irrigation",
+      "Regular monitoring"
+    ]
+  },
+  "Rust": {
+    "id": "rust_001",
+    "name": "Rust",
+    "tamil_name": "பழுப்பு நோய்",
+    "hindi_name": "रस्ट",
+    "scientific_name": "Puccinia, Uromyces species",
+    "crops": ["wheat", "barley", "bean", "pea"],
+    "severity": "medium",
+    "prevalence": "common",
+    "cause": "Fungal pathogen with complex life cycle, spreads via spores",
+    "symptoms": [
+      "Orange-red or brown pustules on leaf undersides",
+      "Powdery spore masses",
+      "Leaf yellowing and necrosis",
+      "Stunted plant growth",
+      "Reduced grain quality and yield"
+    ],
+    "optimal_conditions": {
+      "temperature": "15-20°C",
+      "humidity": ">80%",
+      "rainfall": "2-3mm",
+      "wind_speed": "10-20 km/h"
+    },
+    "treatment": {
+      "chemical": [
+        {
+          "name": "Propiconazole 25% EC",
+          "dosage": "1 ml per liter",
+          "frequency": "Every 10-14 days",
+          "concentration": "0.1%"
+        },
+        {
+          "name": "Hexaconazole 5% SC",
+          "dosage": "2 ml per liter",
+          "frequency": "Every 14-21 days",
+          "concentration": "0.1%"
+        },
+        {
+          "name": "Sulfur 80% WP",
+          "dosage": "2.5 gm per liter",
+          "frequency": "Every 10 days",
+          "concentration": "0.25%"
+        }
+      ],
+      "organic": [
+        {
+          "name": "Sulfur Dusting",
+          "dosage": "20-25 kg per hectare",
+          "frequency": "Every 10-14 days",
+          "preparation": "In early morning or late evening"
+        }
+      ]
+    },
+    "precautions": [
+      "Monitor weather conditions",
+      "Remove affected plant parts",
+      "Improve air circulation",
+      "Avoid excess nitrogen",
+      "Disinfect tools",
+      "Clean up crop residue",
+      "Select rust-resistant varieties"
+    ],
+    "prevention": [
+      "Plant resistant varieties (highly recommended)",
+      "Remove alternate hosts",
+      "Proper spacing",
+      "Avoid excess nitrogen",
+      "Clean field after harvest",
+      "Monitor regularly",
+      "Early detection crucial"
+    ]
+  },
+  "Bacterial_Leaf_Blight": {
+    "id": "bacterial_leaf_blight_001",
+    "name": "Bacterial Leaf Blight",
+    "tamil_name": "பாக்டீரியா இலை புள்ளி",
+    "hindi_name": "जीवाणु पत्ती अंगमारी",
+    "scientific_name": "Xanthomonas oryzae pv. oryzae",
+    "crops": ["rice"],
+    "severity": "high",
+    "prevalence": "common",
+    "cause": "Bacterial infection spreads through water, insects, and infected seeds",
+    "symptoms": [
+      "Water-soaked streaks on leaves",
+      "Lesions enlarge rapidly",
+      "Yellow halo around lesions",
+      "Leaves wilt and dry",
+      "Can cause panicle blight",
+      "Severe yield loss"
+    ],
+    "optimal_conditions": {
+      "temperature": "25-30°C",
+      "humidity": ">85%",
+      "rainfall": "4-5mm",
+      "wind_speed": "15-25 km/h"
+    },
+    "treatment": {
+      "chemical": [
+        {
+          "name": "Streptocycline 10% + Tetracycline 10%",
+          "dosage": "1 gm per 10 liters",
+          "frequency": "Every 7-10 days",
+          "concentration": "0.01%"
+        },
+        {
+          "name": "Copper Oxychloride 50% WP",
+          "dosage": "2.5 gm per liter",
+          "frequency": "Every 7-10 days",
+          "concentration": "0.25%"
+        }
+      ],
+      "organic": [
+        {
+          "name": "Bordeaux Mixture 1%",
+          "dosage": "10 ml per liter",
+          "frequency": "Every 7-10 days",
+          "preparation": "Limit effect but acts as preventive"
+        }
+      ]
+    },
+    "precautions": [
+      "Use disease-free seeds",
+      "Avoid overhead irrigation",
+      "Remove infected plants",
+      "Do not work in wet fields",
+      "Clean tools between plants",
+      "Proper spacing for air circulation",
+      "Remove infected residue"
+    ],
+    "prevention": [
+      "Use certified disease-free seeds",
+      "Select resistant varieties (high priority)",
+      "Avoid water stagnation",
+      "Proper drainage",
+      "Adequate plant spacing",
+      "Clean equipment thoroughly",
+      "Early detection and removal critical"
+    ]
+  },
+  "Healthy": {
+    "id": "healthy_001",
+    "name": "Healthy",
+    "tamil_name": "ஆரோக்கியமான",
+    "hindi_name": "स्वस्थ",
+    "scientific_name": "N/A",
+    "crops": ["all"],
+    "severity": "none",
+    "prevalence": "desired",
+    "cause": "Good agricultural practices and favorable conditions",
+    "symptoms": [
+      "Green leaves with no spots or discoloration",
+      "Normal plant growth",
+      "Proper leaf texture and color",
+      "No signs of disease"
+    ],
+    "optimal_conditions": {
+      "temperature": "20-28°C",
+      "humidity": "60-80%",
+      "rainfall": "2-3mm",
+      "wind_speed": "5-15 km/h"
+    },
+    "treatment": {
+      "chemical": [],
+      "organic": [
+        {
+          "name": "Regular Maintenance",
+          "dosage": "As per schedule",
+          "frequency": "Every 2-3 weeks preventive",
+          "preparation": "Low-dose preventive sprays"
+        }
+      ]
+    },
+    "precautions": [
+      "Maintain regular monitoring",
+      "Continue good field hygiene",
+      "Proper irrigation schedule",
+      "Balanced fertilization",
+      "Good drainage",
+      "Adequate spacing",
+      "Regular scouting"
+    ],
+    "prevention": [
+      "Continue current practices",
+      "Regular monitoring (2-3 times per week)",
+      "Maintain soil health",
+      "Proper irrigation",
+      "Balanced nutrition",
+      "Preventive sprays if necessary",
+      "Clean field regularly"
+    ]
+  }
+}
