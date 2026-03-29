@@ -2,30 +2,61 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Rural Advisory"/>
+<meta name="theme-color" content="#1b4332"/>
 <title>🌾 Rural Advisory System v2.0</title>
+
+<!-- PWA Manifest (inline via JS) -->
+<script>
+(function(){
+  const manifest = {
+    name: "Rural Advisory System",
+    short_name: "RuralAdvisory",
+    description: "AI-powered crop disease detection for Indian farmers",
+    start_url: "./",
+    display: "standalone",
+    background_color: "#1b4332",
+    theme_color: "#1b4332",
+    orientation: "any",
+    icons: [
+      { src: "https://via.placeholder.com/192x192/1b4332/74c69d?text=🌾", sizes: "192x192", type: "image/png" },
+      { src: "https://via.placeholder.com/512x512/1b4332/74c69d?text=🌾", sizes: "512x512", type: "image/png" }
+    ]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const link = document.createElement('link');
+  link.rel = 'manifest'; link.href = url;
+  document.head.appendChild(link);
+})();
+</script>
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
 
-<!-- React + Babel (no build step) -->
+<!-- React + Babel -->
 <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-<!-- Recharts for analytics -->
+<!-- Recharts -->
 <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
 
 <style>
-/* ═══════════════════════════════════════════════
+/* ═══════════════════════════════
    DESIGN SYSTEM
-═══════════════════════════════════════════════ */
+═══════════════════════════════ */
 :root {
   --green-900: #0d2818;
   --green-800: #1b4332;
   --green-700: #2d6a4f;
   --green-600: #40916c;
+  --green-500: #52b788;
   --green-400: #74c69d;
   --green-200: #b7e4c7;
   --green-50:  #d8f3dc;
@@ -46,244 +77,525 @@
   --shadow-lg: 0 12px 40px rgba(0,0,0,.15);
   --radius:    14px;
   --radius-sm: 8px;
+  /* Mobile bottom nav height */
+  --bottom-nav-h: 64px;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
 html, body {
   font-family: 'DM Sans', sans-serif;
   background: var(--gray-50);
   color: var(--gray-800);
   min-height: 100vh;
+  min-height: -webkit-fill-available;
+  overflow-x: hidden;
 }
 
 h1,h2,h3,h4 { font-family: 'Syne', sans-serif; }
 
-/* ── Navbar ── */
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--green-400); border-radius: 99px; }
+
+/* ═══════════════════════════════
+   NAVBAR (desktop)
+═══════════════════════════════ */
 .navbar {
-  position: fixed; top:0; left:0; right:0; z-index:1000;
-  height: 64px;
-  background: linear-gradient(100deg, var(--green-900) 0%, var(--green-800) 50%, var(--green-700) 100%);
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  height: 60px;
+  background: linear-gradient(100deg, var(--green-900) 0%, var(--green-800) 55%, var(--green-700) 100%);
   display: flex; align-items: center; gap: 0;
-  padding: 0 2rem;
-  box-shadow: 0 2px 24px rgba(0,0,0,.3);
+  padding: 0 1.4rem;
+  box-shadow: 0 2px 24px rgba(0,0,0,.35);
 }
 .nav-brand {
-  font-family:'Syne',sans-serif; font-weight:800; font-size:1.15rem;
-  color: var(--green-200); white-space:nowrap; margin-right:2rem;
-  letter-spacing:-.5px;
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem;
+  color: var(--green-200); white-space: nowrap; margin-right: 1.5rem;
+  letter-spacing: -.5px; flex-shrink: 0;
 }
-.nav-brand span { color:var(--green-400); }
-.nav-links { display:flex; gap:2px; flex:1; }
+.nav-brand span { color: var(--green-400); }
+
+.nav-links { display: flex; gap: 2px; flex: 1; overflow-x: auto; }
+.nav-links::-webkit-scrollbar { display: none; }
 .nav-btn {
-  background:transparent; border:none; cursor:pointer;
-  color: var(--green-200); font-family:'DM Sans',sans-serif;
-  font-size:.82rem; font-weight:600; padding:7px 13px; border-radius:7px;
+  background: transparent; border: none; cursor: pointer;
+  color: var(--green-200); font-family: 'DM Sans', sans-serif;
+  font-size: .8rem; font-weight: 600; padding: 7px 12px; border-radius: 7px;
   transition: background .15s, color .15s;
-  white-space:nowrap; letter-spacing:.2px;
+  white-space: nowrap; letter-spacing: .2px; flex-shrink: 0;
 }
-.nav-btn:hover  { background:rgba(255,255,255,.12); color:#fff; }
-.nav-btn.active { background:rgba(255,255,255,.2); color:#fff;
+.nav-btn:hover  { background: rgba(255,255,255,.12); color: #fff; }
+.nav-btn.active { background: rgba(255,255,255,.2); color: #fff;
                   box-shadow: inset 0 -2px 0 var(--green-400); }
-.nav-right { display:flex; align-items:center; gap:10px; margin-left:auto; }
+
+.nav-right { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0; }
 .nav-select {
-  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2);
-  color:var(--green-50); border-radius:8px; padding:6px 10px;
-  font-size:.78rem; font-weight:600; cursor:pointer; outline:none;
-  font-family:inherit;
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+  color: var(--green-50); border-radius: 8px; padding: 5px 8px;
+  font-size: .75rem; font-weight: 600; cursor: pointer; outline: none;
+  font-family: inherit; max-width: 100px;
 }
-.nav-select option { background:var(--green-800); }
+.nav-select option { background: var(--green-800); }
 
-/* ── Layout ── */
-.main { margin-top:64px; min-height:calc(100vh - 64px); padding:2rem; max-width:1200px; margin-left:auto; margin-right:auto; }
+/* ── Hamburger (mobile only) ── */
+.hamburger {
+  display: none; flex-direction: column; gap: 5px; cursor: pointer;
+  background: transparent; border: none; padding: 8px; border-radius: 8px;
+  transition: background .15s; margin-left: auto;
+}
+.hamburger:hover { background: rgba(255,255,255,.12); }
+.hamburger span {
+  display: block; width: 22px; height: 2px;
+  background: var(--green-200); border-radius: 99px;
+  transition: transform .25s, opacity .25s;
+}
+.hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-/* ── Hero ── */
+/* ── Mobile Drawer ── */
+.mobile-drawer {
+  position: fixed; top: 60px; left: 0; right: 0; bottom: 0; z-index: 999;
+  background: var(--green-900);
+  transform: translateX(-100%);
+  transition: transform .28s cubic-bezier(.4,0,.2,1);
+  display: flex; flex-direction: column; padding: 1.2rem 1rem;
+  overflow-y: auto;
+}
+.mobile-drawer.open { transform: translateX(0); }
+.mobile-drawer-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; border-radius: 12px; cursor: pointer;
+  color: var(--green-200); font-weight: 600; font-size: 1rem;
+  border: none; background: transparent; text-align: left; width: 100%;
+  transition: background .15s;
+}
+.mobile-drawer-item:hover { background: rgba(255,255,255,.1); }
+.mobile-drawer-item.active { background: rgba(255,255,255,.18); color: #fff;
+                              border-left: 3px solid var(--green-400); }
+.mobile-drawer-selects { display: flex; gap: 8px; padding: 12px 4px; margin-top: auto; }
+.mobile-drawer-selects select {
+  flex: 1; padding: 9px 10px; background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.2); color: var(--green-50);
+  border-radius: 10px; font-size: .85rem; font-family: inherit;
+  font-weight: 600; outline: none;
+}
+.mobile-drawer-selects select option { background: var(--green-800); }
+
+/* ── Bottom Nav (mobile only) ── */
+.bottom-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 998;
+  height: var(--bottom-nav-h);
+  background: var(--green-900);
+  box-shadow: 0 -4px 20px rgba(0,0,0,.3);
+  border-top: 1px solid rgba(255,255,255,.08);
+  justify-content: space-around; align-items: center;
+  padding: 0 4px;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.bnav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  cursor: pointer; padding: 8px 10px; border-radius: 12px;
+  background: transparent; border: none; flex: 1;
+  transition: background .15s;
+}
+.bnav-item:hover { background: rgba(255,255,255,.08); }
+.bnav-item.active { background: rgba(255,255,255,.15); }
+.bnav-icon { font-size: 1.3rem; line-height: 1; }
+.bnav-label { font-size: .62rem; font-weight: 700; color: var(--green-400); letter-spacing: .4px; text-transform: uppercase; }
+.bnav-item.active .bnav-label { color: var(--white); }
+
+/* ═══════════════════════════════
+   LAYOUT
+═══════════════════════════════ */
+.main {
+  margin-top: 60px;
+  min-height: calc(100vh - 60px);
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ═══════════════════════════════
+   MOBILE ACCESS BANNER
+═══════════════════════════════ */
+.mobile-access-banner {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  border-radius: var(--radius); padding: 1.2rem 1.4rem;
+  color: white; margin-bottom: 1.5rem;
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.mobile-access-banner .icon { font-size: 2rem; flex-shrink: 0; }
+.mobile-access-banner h4 { font-size: 1rem; margin-bottom: .3rem; }
+.mobile-access-banner p  { font-size: .83rem; opacity: .9; line-height: 1.5; }
+.mobile-access-banner code {
+  background: rgba(0,0,0,.25); border-radius: 5px; padding: 2px 7px;
+  font-family: monospace; font-size: .82rem; letter-spacing: .5px;
+}
+.install-steps { margin-top: .6rem; }
+.install-steps li { font-size: .82rem; opacity: .9; margin-bottom: 3px; list-style: none; padding-left: 14px; }
+.install-steps li::before { content: "→ "; }
+
+/* ═══════════════════════════════
+   HERO
+═══════════════════════════════ */
 .hero {
   background: linear-gradient(135deg, var(--green-900) 0%, var(--green-800) 55%, var(--green-600) 100%);
-  border-radius: 20px; padding: 2.5rem 3rem; color: var(--green-50);
-  margin-bottom:2rem; position:relative; overflow:hidden;
+  border-radius: 20px; padding: 2rem 2rem 2rem; color: var(--green-50);
+  margin-bottom: 1.5rem; position: relative; overflow: hidden;
 }
 .hero::before {
-  content:''; position:absolute; top:-60px; right:-60px;
-  width:260px; height:260px; border-radius:50%;
-  background:rgba(116,198,157,.12); pointer-events:none;
+  content: ''; position: absolute; top: -60px; right: -40px;
+  width: 200px; height: 200px; border-radius: 50%;
+  background: rgba(116,198,157,.12); pointer-events: none;
 }
-.hero h1 { font-size:2.4rem; font-weight:800; color:var(--green-200); margin-bottom:.5rem; }
-.hero p  { font-size:1.05rem; color:var(--green-50); opacity:.85; }
+.hero h1 { font-size: 1.9rem; font-weight: 800; color: var(--green-200); margin-bottom: .4rem; }
+.hero p  { font-size: .95rem; color: var(--green-50); opacity: .85; }
 
-/* ── Cards ── */
+/* ═══════════════════════════════
+   CARDS
+═══════════════════════════════ */
 .card {
-  background:var(--white); border-radius:var(--radius); padding:1.4rem 1.6rem;
-  box-shadow:var(--shadow-md); margin-bottom:1rem;
+  background: var(--white); border-radius: var(--radius); padding: 1.3rem 1.5rem;
+  box-shadow: var(--shadow-md); margin-bottom: 1rem;
 }
-.card-border-high   { border-left:4px solid var(--red); }
-.card-border-medium { border-left:4px solid var(--orange); }
-.card-border-low    { border-left:4px solid var(--green-600); }
+.card-border-high   { border-left: 4px solid var(--red); }
+.card-border-medium { border-left: 4px solid var(--orange); }
+.card-border-low    { border-left: 4px solid var(--green-600); }
 
-/* ── Grid ── */
-.grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:1.2rem; }
-.grid-2 { display:grid; grid-template-columns:repeat(2,1fr); gap:1.2rem; }
-.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:1.2rem; }
-@media(max-width:900px) { .grid-3,.grid-4 { grid-template-columns:1fr 1fr; } }
-@media(max-width:600px) { .grid-3,.grid-2,.grid-4 { grid-template-columns:1fr; } }
+/* ═══════════════════════════════
+   GRID
+═══════════════════════════════ */
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
+.grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 1rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; }
 
-/* ── Metric tiles ── */
+/* ═══════════════════════════════
+   METRIC TILES
+═══════════════════════════════ */
 .metric {
-  background:var(--white); border-radius:var(--radius); padding:1.2rem 1.4rem;
-  box-shadow:var(--shadow-sm); text-align:center;
+  background: var(--white); border-radius: var(--radius); padding: 1.1rem 1.2rem;
+  box-shadow: var(--shadow-sm); text-align: center;
 }
-.metric-val { font-size:2rem; font-weight:800; font-family:'Syne',sans-serif; color:var(--green-800); }
-.metric-lbl { font-size:.78rem; font-weight:600; color:var(--gray-400); margin-top:4px; text-transform:uppercase; letter-spacing:.6px; }
-.metric-delta { font-size:.8rem; color:var(--green-600); font-weight:700; }
+.metric-val { font-size: 1.7rem; font-weight: 800; font-family: 'Syne', sans-serif; color: var(--green-800); }
+.metric-lbl { font-size: .72rem; font-weight: 600; color: var(--gray-400); margin-top: 3px; text-transform: uppercase; letter-spacing: .6px; }
+.metric-delta { font-size: .78rem; color: var(--green-600); font-weight: 700; }
 
-/* ── Buttons ── */
+/* ═══════════════════════════════
+   BUTTONS
+═══════════════════════════════ */
 .btn {
-  display:inline-flex; align-items:center; gap:8px; cursor:pointer;
-  border:none; border-radius:10px; padding:11px 22px;
-  font-family:'DM Sans',sans-serif; font-size:.9rem; font-weight:700;
-  transition: all .18s; outline:none;
+  display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+  border: none; border-radius: 10px; padding: 11px 20px;
+  font-family: 'DM Sans', sans-serif; font-size: .9rem; font-weight: 700;
+  transition: all .18s; outline: none; touch-action: manipulation;
 }
 .btn-primary {
   background: linear-gradient(135deg, var(--green-700), var(--green-600));
-  color:#fff; box-shadow: 0 4px 14px rgba(45,106,79,.35);
+  color: #fff; box-shadow: 0 4px 14px rgba(45,106,79,.35);
 }
-.btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(45,106,79,.45); }
-.btn-primary:disabled { opacity:.5; cursor:not-allowed; transform:none; }
-.btn-outline {
-  background:transparent; color:var(--green-700);
-  border:2px solid var(--green-600);
-}
-.btn-outline:hover { background:var(--green-50); }
-.btn-full { width:100%; justify-content:center; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(45,106,79,.45); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.btn-outline { background: transparent; color: var(--green-700); border: 2px solid var(--green-600); }
+.btn-outline:hover { background: var(--green-50); }
+.btn-full { width: 100%; justify-content: center; }
 
-/* ── Upload zone ── */
+/* ═══════════════════════════════
+   UPLOAD
+═══════════════════════════════ */
 .upload-zone {
-  border:2px dashed var(--green-400); border-radius:var(--radius);
-  padding:3rem 2rem; text-align:center; background:var(--green-50);
-  cursor:pointer; transition: border-color .2s, background .2s;
+  border: 2px dashed var(--green-400); border-radius: var(--radius);
+  padding: 2.5rem 1.5rem; text-align: center; background: var(--green-50);
+  cursor: pointer; transition: border-color .2s, background .2s;
 }
-.upload-zone:hover { border-color:var(--green-700); background:#c6f0d4; }
-.upload-icon { font-size:3rem; margin-bottom:1rem; display:block; }
+.upload-zone:hover, .upload-zone:active { border-color: var(--green-700); background: #c6f0d4; }
+.upload-icon { font-size: 2.8rem; margin-bottom: .8rem; display: block; }
 
-/* ── Camera ── */
-.camera-wrapper { border-radius:var(--radius); overflow:hidden; background:#000; position:relative; }
-.camera-wrapper video { width:100%; display:block; max-height:340px; object-fit:cover; }
+/* ═══════════════════════════════
+   CAMERA
+═══════════════════════════════ */
+.camera-wrapper { border-radius: var(--radius); overflow: hidden; background: #000; position: relative; }
+.camera-wrapper video { width: 100%; display: block; max-height: 300px; object-fit: cover; }
 
-/* ── Tabs ── */
-.tabs { display:flex; border-bottom:2px solid var(--gray-200); margin-bottom:1.5rem; gap:4px; }
+/* ═══════════════════════════════
+   TABS
+═══════════════════════════════ */
+.tabs {
+  display: flex; border-bottom: 2px solid var(--gray-200);
+  margin-bottom: 1.3rem; gap: 2px; overflow-x: auto;
+}
+.tabs::-webkit-scrollbar { display: none; }
 .tab {
-  padding:10px 18px; cursor:pointer; border:none; background:transparent;
-  font-family:'DM Sans',sans-serif; font-size:.88rem; font-weight:600;
-  color:var(--gray-400); border-radius:8px 8px 0 0; transition:color .15s, background .15s;
+  padding: 9px 14px; cursor: pointer; border: none; background: transparent;
+  font-family: 'DM Sans', sans-serif; font-size: .84rem; font-weight: 600;
+  color: var(--gray-400); border-radius: 8px 8px 0 0;
+  transition: color .15s, background .15s; white-space: nowrap; flex-shrink: 0;
 }
-.tab:hover { color:var(--green-700); background:var(--gray-100); }
-.tab.active { color:var(--green-800); border-bottom:2px solid var(--green-700);
-              background:var(--white); margin-bottom:-2px; }
+.tab:hover { color: var(--green-700); background: var(--gray-100); }
+.tab.active { color: var(--green-800); border-bottom: 2px solid var(--green-700);
+              background: var(--white); margin-bottom: -2px; }
 
-/* ── Confidence bar ── */
-.conf-bar { background:var(--gray-200); border-radius:99px; height:10px; overflow:hidden; }
-.conf-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,var(--green-600),var(--green-400));
-             transition:width .6s cubic-bezier(.4,0,.2,1); }
+/* ═══════════════════════════════
+   CONFIDENCE BAR
+═══════════════════════════════ */
+.conf-bar { background: var(--gray-200); border-radius: 99px; height: 10px; overflow: hidden; }
+.conf-fill { height: 100%; border-radius: 99px;
+             background: linear-gradient(90deg, var(--green-600), var(--green-400));
+             transition: width .6s cubic-bezier(.4,0,.2,1); }
 
-/* ── Weather status ── */
-.wx-ok   { background:#dcfce7; color:#15803d; border-radius:var(--radius-sm); padding:12px 16px; font-weight:700; }
-.wx-wait { background:#fef9c3; color:#a16207; border-radius:var(--radius-sm); padding:12px 16px; font-weight:700; }
-.wx-no   { background:#fee2e2; color:#b91c1c; border-radius:var(--radius-sm); padding:12px 16px; font-weight:700; }
+/* ═══════════════════════════════
+   WEATHER
+═══════════════════════════════ */
+.wx-ok   { background: #dcfce7; color: #15803d; border-radius: var(--radius-sm); padding: 12px 16px; font-weight: 700; }
+.wx-wait { background: #fef9c3; color: #a16207; border-radius: var(--radius-sm); padding: 12px 16px; font-weight: 700; }
+.wx-no   { background: #fee2e2; color: #b91c1c; border-radius: var(--radius-sm); padding: 12px 16px; font-weight: 700; }
 
-/* ── Tags ── */
-.tag { display:inline-block; background:var(--green-50); color:var(--green-700);
-       border-radius:99px; padding:2px 12px; font-size:.78rem; font-weight:700;
-       margin:2px; border:1px solid var(--green-200); }
-.tag-high   { background:#fee2e2; color:#b91c1c; border-color:#fca5a5; }
-.tag-medium { background:#fff7ed; color:#c2410c; border-color:#fed7aa; }
+/* ═══════════════════════════════
+   TAGS
+═══════════════════════════════ */
+.tag { display: inline-block; background: var(--green-50); color: var(--green-700);
+       border-radius: 99px; padding: 2px 11px; font-size: .76rem; font-weight: 700;
+       margin: 2px; border: 1px solid var(--green-200); }
+.tag-high   { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+.tag-medium { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
 
-/* ── Voice banner ── */
+/* ═══════════════════════════════
+   VOICE BANNER
+═══════════════════════════════ */
 .voice-banner {
-  background:linear-gradient(90deg,var(--green-800),var(--green-600));
-  color:var(--green-200); border-radius:var(--radius); padding:1rem 1.4rem;
-  font-weight:700; font-size:1rem; display:flex; align-items:center; gap:12px;
-  margin:1rem 0;
+  background: linear-gradient(90deg, var(--green-800), var(--green-600));
+  color: var(--green-200); border-radius: var(--radius); padding: .9rem 1.2rem;
+  font-weight: 700; font-size: .95rem; display: flex; align-items: center; gap: 10px;
+  margin: .8rem 0;
 }
-.pulse { animation:pulse 1.2s infinite; }
+.pulse { animation: pulse 1.2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 
-/* ── Remedy box ── */
+/* ═══════════════════════════════
+   REMEDY
+═══════════════════════════════ */
 .remedy-box {
-  background:var(--green-50); border:1px solid var(--green-200);
-  border-radius:var(--radius); padding:1.2rem 1.4rem;
-  white-space:pre-wrap; font-size:.94rem; line-height:1.85;
-  color:var(--green-900);
+  background: var(--green-50); border: 1px solid var(--green-200);
+  border-radius: var(--radius); padding: 1.1rem 1.3rem;
+  white-space: pre-wrap; font-size: .91rem; line-height: 1.85;
+  color: var(--green-900);
 }
 
-/* ── Alert ── */
-.alert { border-radius:var(--radius-sm); padding:10px 14px; font-size:.88rem; font-weight:600; margin-bottom:.5rem; }
-.alert-green { background:#dcfce7; color:#15803d; }
-.alert-red   { background:#fee2e2; color:#b91c1c; }
-.alert-yellow{ background:#fef9c3; color:#a16207; }
-.alert-blue  { background:#dbeafe; color:#1d4ed8; }
+/* ═══════════════════════════════
+   ALERTS
+═══════════════════════════════ */
+.alert { border-radius: var(--radius-sm); padding: 10px 14px; font-size: .86rem; font-weight: 600; margin-bottom: .5rem; }
+.alert-green  { background: #dcfce7; color: #15803d; }
+.alert-red    { background: #fee2e2; color: #b91c1c; }
+.alert-yellow { background: #fef9c3; color: #a16207; }
+.alert-blue   { background: #dbeafe; color: #1d4ed8; }
 
-/* ── Spinner ── */
+/* ═══════════════════════════════
+   SPINNER
+═══════════════════════════════ */
 .spinner {
-  width:40px; height:40px; border:4px solid var(--green-200);
-  border-top-color:var(--green-600); border-radius:50%;
-  animation:spin 0.8s linear infinite; margin:2rem auto;
+  width: 38px; height: 38px; border: 4px solid var(--green-200);
+  border-top-color: var(--green-600); border-radius: 50%;
+  animation: spin 0.8s linear infinite; margin: 2rem auto;
 }
-@keyframes spin { to { transform:rotate(360deg); } }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── Treatment cards ── */
-.treatment-card { background:var(--gray-50); border-radius:var(--radius-sm);
-                  padding:1rem 1.2rem; border:1px solid var(--gray-200); margin-bottom:.6rem; }
-.treatment-card h4 { color:var(--green-800); margin-bottom:.4rem; font-size:.9rem; }
-.treatment-card p  { font-size:.83rem; color:var(--gray-600); margin-bottom:.2rem; }
+/* ═══════════════════════════════
+   TREATMENT CARD
+═══════════════════════════════ */
+.treatment-card { background: var(--gray-50); border-radius: var(--radius-sm);
+                  padding: .9rem 1.1rem; border: 1px solid var(--gray-200); margin-bottom: .5rem; }
+.treatment-card h4 { color: var(--green-800); margin-bottom: .3rem; font-size: .88rem; }
+.treatment-card p  { font-size: .82rem; color: var(--gray-600); margin-bottom: .15rem; }
 
-/* ── Expander ── */
-.expander { border:1px solid var(--gray-200); border-radius:var(--radius-sm); margin-bottom:.6rem; overflow:hidden; }
+/* ═══════════════════════════════
+   EXPANDER
+═══════════════════════════════ */
+.expander { border: 1px solid var(--gray-200); border-radius: var(--radius-sm); margin-bottom: .5rem; overflow: hidden; }
 .expander-header {
-  padding:.9rem 1.2rem; cursor:pointer; display:flex; justify-content:space-between;
-  align-items:center; background:var(--white); font-weight:600; font-size:.9rem;
-  transition:background .15s;
+  padding: .85rem 1.1rem; cursor: pointer; display: flex; justify-content: space-between;
+  align-items: center; background: var(--white); font-weight: 600; font-size: .88rem;
+  transition: background .15s; user-select: none;
 }
-.expander-header:hover { background:var(--gray-50); }
-.expander-body { padding:1rem 1.2rem; background:var(--white); border-top:1px solid var(--gray-100); }
+.expander-header:hover { background: var(--gray-50); }
+.expander-body { padding: .9rem 1.1rem; background: var(--white); border-top: 1px solid var(--gray-100); }
 
-/* ── Table ── */
-.data-table { width:100%; border-collapse:collapse; font-size:.85rem; }
-.data-table th { background:var(--green-800); color:var(--green-200); padding:10px 14px; text-align:left; }
-.data-table td { padding:9px 14px; border-bottom:1px solid var(--gray-200); }
-.data-table tr:last-child td { border-bottom:none; }
-.data-table tr:hover td { background:var(--green-50); }
+/* ═══════════════════════════════
+   TABLE
+═══════════════════════════════ */
+.data-table { width: 100%; border-collapse: collapse; font-size: .83rem; }
+.data-table th { background: var(--green-800); color: var(--green-200); padding: 9px 12px; text-align: left; white-space: nowrap; }
+.data-table td { padding: 8px 12px; border-bottom: 1px solid var(--gray-200); }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--green-50); }
 
-/* ── Footer ── */
-.footer { text-align:center; padding:2rem; color:var(--gray-400); font-size:.82rem; margin-top:2rem; }
+/* ═══════════════════════════════
+   PROBA CHART
+═══════════════════════════════ */
+.proba-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.proba-label { width: 130px; font-size: .78rem; font-weight: 600; color: var(--gray-600); flex-shrink: 0; text-align: right; }
+.proba-bar-wrap { flex: 1; background: var(--gray-200); border-radius: 99px; height: 7px; }
+.proba-bar { height: 7px; border-radius: 99px; background: linear-gradient(90deg, var(--green-600), var(--green-400)); transition: width .5s; }
+.proba-pct { width: 38px; font-size: .76rem; font-weight: 700; color: var(--green-700); }
 
-/* ── Image preview ── */
-.img-preview { width:100%; border-radius:var(--radius); object-fit:cover; max-height:320px; display:block; }
+/* ═══════════════════════════════
+   IMAGE PREVIEW
+═══════════════════════════════ */
+.img-preview { width: 100%; border-radius: var(--radius); object-fit: cover; max-height: 280px; display: block; }
 
-/* ── Proba chart bars ── */
-.proba-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
-.proba-label { width:160px; font-size:.8rem; font-weight:600; color:var(--gray-600); flex-shrink:0; text-align:right; }
-.proba-bar-wrap { flex:1; background:var(--gray-200); border-radius:99px; height:8px; }
-.proba-bar { height:8px; border-radius:99px; background:linear-gradient(90deg,var(--green-600),var(--green-400)); transition:width .5s; }
-.proba-pct { width:44px; font-size:.78rem; font-weight:700; color:var(--green-700); }
+/* ═══════════════════════════════
+   FOOTER
+═══════════════════════════════ */
+.footer { text-align: center; padding: 2rem 1rem; color: var(--gray-400); font-size: .78rem; margin-top: 1.5rem; }
 
-/* scrollbar */
-::-webkit-scrollbar { width:6px; }
-::-webkit-scrollbar-track { background:transparent; }
-::-webkit-scrollbar-thumb { background:var(--green-400); border-radius:99px; }
+/* ═══════════════════════════════
+   INSTALL PROMPT TOAST
+═══════════════════════════════ */
+.install-toast {
+  position: fixed; bottom: calc(var(--bottom-nav-h) + 12px); left: 12px; right: 12px; z-index: 2000;
+  background: var(--green-800); color: white; border-radius: 14px;
+  padding: 14px 16px; box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  display: flex; align-items: center; gap: 12px;
+  animation: slideUp .35s ease;
+}
+@keyframes slideUp { from { transform: translateY(80px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+.install-toast-text { flex: 1; font-size: .88rem; font-weight: 600; }
+.install-toast-text span { display: block; font-size: .78rem; opacity: .75; font-weight: 400; }
+.install-toast-btn {
+  background: var(--green-400); color: var(--green-900); border: none;
+  border-radius: 9px; padding: 8px 14px; font-weight: 800; font-size: .82rem;
+  cursor: pointer; flex-shrink: 0;
+}
+.install-toast-close {
+  background: transparent; border: none; color: rgba(255,255,255,.6);
+  font-size: 1.2rem; cursor: pointer; padding: 4px; line-height: 1;
+}
+
+/* ═══════════════════════════════
+   MOBILE ACCESS INFO MODAL
+═══════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 3000;
+  background: rgba(0,0,0,.6); backdrop-filter: blur(4px);
+  display: flex; align-items: flex-end; justify-content: center; padding: 0;
+}
+.modal-sheet {
+  background: white; border-radius: 20px 20px 0 0; width: 100%; max-width: 600px;
+  padding: 1.5rem; max-height: 85vh; overflow-y: auto;
+  animation: sheetUp .3s ease;
+}
+@keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle { width: 40px; height: 4px; background: var(--gray-200); border-radius: 99px; margin: 0 auto 1.2rem; }
+
+/* ═══════════════════════════════
+   QR CODE AREA
+═══════════════════════════════ */
+.qr-container { text-align: center; padding: 1rem; }
+.qr-frame {
+  width: 160px; height: 160px; margin: 0 auto 1rem;
+  border: 3px solid var(--green-700); border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--green-50); font-size: 3rem;
+}
+.ip-box {
+  background: var(--green-800); color: var(--green-50); border-radius: 10px;
+  padding: .8rem 1rem; font-family: monospace; font-size: 1.1rem;
+  letter-spacing: .5px; font-weight: 700; margin: .6rem 0;
+}
+.copy-btn {
+  background: var(--green-600); color: white; border: none; border-radius: 8px;
+  padding: 8px 18px; font-weight: 700; font-size: .85rem; cursor: pointer;
+}
+
+/* ═══════════════════════════════
+   SAFE AREA (iPhone X+)
+═══════════════════════════════ */
+.main { padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)); }
+
+/* ═══════════════════════════════
+   RESPONSIVE BREAKPOINTS
+═══════════════════════════════ */
+@media (max-width: 900px) {
+  .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 680px) {
+  /* Show hamburger, hide desktop nav links */
+  .nav-links { display: none; }
+  .nav-right  { display: none; }
+  .hamburger  { display: flex; }
+
+  /* Show bottom nav */
+  .bottom-nav { display: flex; }
+
+  /* Adjust main for bottom nav */
+  .main {
+    margin-top: 60px;
+    padding: 1rem;
+    padding-bottom: calc(var(--bottom-nav-h) + 1rem + env(safe-area-inset-bottom));
+  }
+
+  .hero { padding: 1.5rem; }
+  .hero h1 { font-size: 1.5rem; }
+  .hero p   { font-size: .88rem; }
+
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .grid-2.keep-2 { grid-template-columns: 1fr 1fr; }
+
+  .metric-val { font-size: 1.4rem; }
+
+  .btn { padding: 12px 16px; font-size: .88rem; }
+
+  .nav-brand { font-size: .95rem; }
+
+  .proba-label { width: 100px; font-size: .72rem; }
+
+  .install-toast { bottom: calc(var(--bottom-nav-h) + 10px); }
+
+  /* Touch-friendly inputs */
+  input, select, textarea { font-size: 16px !important; }
+}
+
+@media (max-width: 400px) {
+  .hero h1 { font-size: 1.3rem; }
+  .main { padding: .8rem; }
+  .main { padding-bottom: calc(var(--bottom-nav-h) + .8rem + env(safe-area-inset-bottom)); }
+}
 </style>
 </head>
 
 <body>
 <div id="root"></div>
 
+<!-- PWA Service Worker (registers inline) -->
+<script>
+if ('serviceWorker' in navigator) {
+  const sw = `
+    const CACHE = 'rural-advisory-v1';
+    self.addEventListener('install', e => {
+      e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./'])));
+    });
+    self.addEventListener('fetch', e => {
+      e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+    });
+  `;
+  const blob = new Blob([sw], {type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+}
+</script>
+
 <script type="text/babel">
 const { useState, useEffect, useRef, useCallback } = React;
-const API = "https://ai-advisor-x6y9.onrender.com";
+const API = "http://localhost:8000";
 
-// ═══════════════════════════════════════════════
-//  DISEASE DB (hardcoded subset for offline use;
-//  full DB fetched from API on load)
-// ═══════════════════════════════════════════════
+/* ═══════════════════════════
+   DATA
+═══════════════════════════ */
 const MOCK_WEATHER = {
   Chennai:   { temp:32.5, humidity:75, rainfall:2.5, wind:12, status:"ok",   messages:[] },
   Delhi:     { temp:28.3, humidity:65, rainfall:0.0, wind:8,  status:"ok",   messages:[] },
@@ -327,12 +639,12 @@ const TRANSLATIONS = {
 };
 
 function buildRemedy(info, language) {
-  const name = language === "Tamil" ? (info.tamil_name || info.name)
-             : language === "Hindi" ? (info.hindi_name || info.name)
+  const name = language==="Tamil" ? (info.tamil_name||info.name)
+             : language==="Hindi" ? (info.hindi_name||info.name)
              : info.name;
-  const chem = (info.treatment?.chemical || []).slice(0,2);
-  const org  = (info.treatment?.organic  || []).slice(0,2);
-  const prec = (info.precautions || []).slice(0,3);
+  const chem = (info.treatment?.chemical||[]).slice(0,2);
+  const org  = (info.treatment?.organic||[]).slice(0,2);
+  const prec = (info.precautions||[]).slice(0,3);
   const fmtC = items => items.map(c=>`  • ${c.name} — ${c.dosage}`).join("\n") || "  • —";
   const fmtP = items => items.map(p=>`  • ${p}`).join("\n");
   if(language==="Tamil") return `வணக்கம் விவசாயி!\n\nஉங்கள் பயிரில் ${name} நோய் கண்டறியப்பட்டுள்ளது.\n\nஇரசாயன சிகிச்சை:\n${fmtC(chem)}\n\nஇயற்கை சிகிச்சை:\n${fmtC(org)}\n\nமுன்னெச்சரிக்கைகள்:\n${fmtP(prec)}\n\nநன்றி! வாழ்க விவசாயம்!`;
@@ -340,36 +652,9 @@ function buildRemedy(info, language) {
   return `Hello Farmer!\n\nYour crop has been diagnosed with ${name}.\n\nChemical Treatment:\n${fmtC(chem)}\n\nOrganic Treatment:\n${fmtC(org)}\n\nPrecautions:\n${fmtP(prec)}\n\nThank you! Happy farming!`;
 }
 
-// ═══════════════════════════════════════════════
-//  COMPONENTS
-// ═══════════════════════════════════════════════
-
-function Navbar({ page, setPage, language, setLanguage, location, setLocation }) {
-  const pages = [
-    ["home","🏠 Home"], ["detection","🔍 Detection"], 
-    ["disease_db","📖 Disease DB"], ["history","📋 History"],
-    ["settings","⚙️ Settings"], ["help","❓ Help"],
-  ];
-  return (
-    <nav className="navbar">
-      <div className="nav-brand">🌾 Rural <span>Advisory</span></div>
-      <div className="nav-links">
-        {pages.map(([k,label]) => (
-          <button key={k} className={`nav-btn ${page===k?"active":""}`} onClick={()=>setPage(k)}>{label}</button>
-        ))}
-      </div>
-      <div className="nav-right">
-        <select className="nav-select" value={language} onChange={e=>setLanguage(e.target.value)}>
-          {["English","Tamil","Hindi"].map(l=><option key={l}>{l}</option>)}
-        </select>
-        <select className="nav-select" value={location} onChange={e=>setLocation(e.target.value)}>
-          {Object.keys(MOCK_WEATHER).map(l=><option key={l}>{l}</option>)}
-        </select>
-      </div>
-    </nav>
-  );
-}
-
+/* ═══════════════════════════
+   SHARED COMPONENTS
+═══════════════════════════ */
 function MetricTile({ value, label, delta }) {
   return (
     <div className="metric">
@@ -382,7 +667,7 @@ function MetricTile({ value, label, delta }) {
 
 function ConfBar({ value }) {
   const pct = Math.round(value * 100);
-  const color = pct >= 80 ? "#2d6a4f" : pct >= 60 ? "#f97316" : "#ef4444";
+  const color = pct>=80?"#2d6a4f":pct>=60?"#f97316":"#ef4444";
   return (
     <div>
       <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
@@ -390,17 +675,16 @@ function ConfBar({ value }) {
         <span style={{fontSize:".9rem",fontWeight:800,color}}>{pct}%</span>
       </div>
       <div className="conf-bar">
-        <div className="conf-fill" style={{width:`${pct}%`, background:`linear-gradient(90deg,${color},${color}99)`}}/>
+        <div className="conf-fill" style={{width:`${pct}%`,background:`linear-gradient(90deg,${color},${color}99)`}}/>
       </div>
     </div>
   );
 }
 
 function ProbaChart({ allProba }) {
-  const entries = Object.entries(allProba).sort((a,b)=>b[1]-a[1]);
   return (
     <div>
-      {entries.map(([key, prob]) => (
+      {Object.entries(allProba).sort((a,b)=>b[1]-a[1]).map(([key,prob])=>(
         <div key={key} className="proba-row">
           <div className="proba-label">{key.replace(/_/g," ")}</div>
           <div className="proba-bar-wrap">
@@ -418,8 +702,7 @@ function Expander({ title, children }) {
   return (
     <div className="expander">
       <div className="expander-header" onClick={()=>setOpen(!open)}>
-        <span>{title}</span>
-        <span>{open?"▲":"▼"}</span>
+        <span>{title}</span><span>{open?"▲":"▼"}</span>
       </div>
       {open && <div className="expander-body">{children}</div>}
     </div>
@@ -427,10 +710,10 @@ function Expander({ title, children }) {
 }
 
 function TreatmentCard({ item, type }) {
-  const bg = type==="chemical" ? "#f0fdf4" : "#eff6ff";
-  const bc = type==="chemical" ? "#86efac" : "#93c5fd";
+  const bg = type==="chemical"?"#f0fdf4":"#eff6ff";
+  const bc = type==="chemical"?"#86efac":"#93c5fd";
   return (
-    <div className="treatment-card" style={{background:bg, borderColor:bc}}>
+    <div className="treatment-card" style={{background:bg,borderColor:bc}}>
       <h4>{item.name}</h4>
       <p>📦 Dosage: <strong>{item.dosage}</strong></p>
       <p>🔁 Frequency: {item.frequency}</p>
@@ -439,38 +722,203 @@ function TreatmentCard({ item, type }) {
   );
 }
 
-// ═══════════════════════════════════════════════
-//  PAGES
-// ═══════════════════════════════════════════════
+/* ═══════════════════════════
+   MOBILE ACCESS MODAL
+═══════════════════════════ */
+function MobileAccessModal({ onClose }) {
+  const [copied, setCopied] = useState(false);
+  const url = "http://YOUR-PC-IP:5500";
 
-function HomePage({ diseaseDb }) {
+  const copy = () => {
+    navigator.clipboard?.writeText(url).catch(()=>{});
+    setCopied(true); setTimeout(()=>setCopied(false), 2000);
+  };
+
+  return (
+    <div className="modal-overlay" onClick={e=>{ if(e.target===e.currentTarget) onClose(); }}>
+      <div className="modal-sheet">
+        <div className="modal-handle"/>
+        <h3 style={{textAlign:"center",color:"var(--green-800)",marginBottom:".2rem"}}>📱 Open on Your Phone</h3>
+        <p style={{textAlign:"center",color:"var(--gray-600)",fontSize:".85rem",marginBottom:"1.2rem"}}>
+          Follow these steps to access Rural Advisory on any mobile device on the same Wi-Fi
+        </p>
+
+        {/* Steps */}
+        {[
+          ["1","Find your PC's local IP","Open Command Prompt (Windows) or Terminal (Mac/Linux) and run:\n• Windows: ipconfig  →  look for IPv4 Address\n• Mac/Linux: ifconfig or ip a  →  look for inet under your Wi-Fi adapter\nExample result: 192.168.1.42"],
+          ["2","Run a local server","If you opened this as a plain HTML file, start a simple server:\n• VS Code: Install Live Server → right-click → Open with Live Server (port 5500)\n• Python: python -m http.server 8080\n• Node.js: npx serve . -p 8080\n• Also start the Python backend: uvicorn main:app --reload --host 0.0.0.0"],
+          ["3","Open in mobile browser","On your phone (connected to same Wi-Fi), open Chrome or Safari and go to:\nhttp://YOUR-PC-IP:5500\nExample: http://192.168.1.42:5500"],
+          ["4","Install as app (PWA)","Android Chrome: tap the ⋮ menu → Add to Home Screen\niOS Safari: tap the Share icon (□↑) → Add to Home Screen\nThe app will open full-screen like a native app!"],
+        ].map(([num,title,desc])=>(
+          <div key={num} style={{display:"flex",gap:12,marginBottom:"1rem",alignItems:"flex-start"}}>
+            <div style={{width:32,height:32,borderRadius:"50%",background:"var(--green-700)",color:"white",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:".9rem",flexShrink:0,marginTop:2}}>{num}</div>
+            <div>
+              <div style={{fontWeight:700,fontSize:".9rem",color:"var(--green-900)",marginBottom:4}}>{title}</div>
+              <div style={{fontSize:".82rem",color:"var(--gray-600)",whiteSpace:"pre-line",lineHeight:1.6}}>{desc}</div>
+            </div>
+          </div>
+        ))}
+
+        {/* QR placeholder */}
+        <div className="qr-container">
+          <div className="qr-frame">📱</div>
+          <p style={{fontSize:".8rem",color:"var(--gray-500)",marginBottom:".5rem"}}>
+            Generate a QR code at <strong>qr.io</strong> or <strong>goqr.me</strong> with your local URL for easy scanning
+          </p>
+          <div className="ip-box">http://192.168.x.x:5500</div>
+          <button className="copy-btn" onClick={copy}>
+            {copied?"✅ Copied!":"📋 Copy URL template"}
+          </button>
+        </div>
+
+        {/* PWA note */}
+        <div className="alert alert-green" style={{marginTop:"1rem"}}>
+          ✅ This app is <strong>PWA-ready</strong> — install it on your phone's home screen for an app-like experience with offline support.
+        </div>
+
+        <button className="btn btn-primary btn-full" style={{marginTop:"1rem"}} onClick={onClose}>
+          Got it! Close
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════
+   NAVBAR
+═══════════════════════════ */
+function Navbar({ page, setPage, language, setLanguage, location, setLocation, isMobile, drawerOpen, setDrawerOpen }) {
+  const pages = [
+    ["home","🏠 Home"], ["detection","🔍 Detection"],
+    ["disease_db","📖 Disease DB"], ["history","📋 History"],
+    ["mobile_access","📱 Mobile Access"], ["settings","⚙️ Settings"], ["help","❓ Help"],
+  ];
+  return (
+    <>
+      <nav className="navbar">
+        <div className="nav-brand">🌾 Rural <span>Advisory</span></div>
+        <div className="nav-links">
+          {pages.map(([k,label])=>(
+            <button key={k} className={`nav-btn ${page===k?"active":""}`} onClick={()=>setPage(k)}>{label}</button>
+          ))}
+        </div>
+        <div className="nav-right">
+          <select className="nav-select" value={language} onChange={e=>setLanguage(e.target.value)}>
+            {["English","Tamil","Hindi"].map(l=><option key={l}>{l}</option>)}
+          </select>
+          <select className="nav-select" value={location} onChange={e=>setLocation(e.target.value)}>
+            {Object.keys(MOCK_WEATHER).map(l=><option key={l}>{l}</option>)}
+          </select>
+        </div>
+        {/* Hamburger */}
+        <button className={`hamburger ${drawerOpen?"open":""}`} onClick={()=>setDrawerOpen(!drawerOpen)} aria-label="Menu">
+          <span/><span/><span/>
+        </button>
+      </nav>
+
+      {/* Mobile Drawer */}
+      <div className={`mobile-drawer ${drawerOpen?"open":""}`}>
+        {pages.map(([k,label])=>(
+          <button key={k} className={`mobile-drawer-item ${page===k?"active":""}`}
+                  onClick={()=>{ setPage(k); setDrawerOpen(false); }}>
+            {label}
+          </button>
+        ))}
+        <div className="mobile-drawer-selects">
+          <select value={language} onChange={e=>setLanguage(e.target.value)}>
+            {["English","Tamil","Hindi"].map(l=><option key={l}>{l}</option>)}
+          </select>
+          <select value={location} onChange={e=>setLocation(e.target.value)}>
+            {Object.keys(MOCK_WEATHER).map(l=><option key={l}>{l}</option>)}
+          </select>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ═══════════════════════════
+   BOTTOM NAV
+═══════════════════════════ */
+function BottomNav({ page, setPage }) {
+  const items = [
+    ["home","🏠","Home"], ["detection","🔍","Detect"],
+    ["disease_db","📖","DB"], ["history","📋","History"],
+    ["settings","⚙️","More"],
+  ];
+  return (
+    <nav className="bottom-nav">
+      {items.map(([k,icon,label])=>(
+        <button key={k} className={`bnav-item ${page===k?"active":""}`} onClick={()=>setPage(k)}>
+          <span className="bnav-icon">{icon}</span>
+          <span className="bnav-label">{label}</span>
+        </button>
+      ))}
+    </nav>
+  );
+}
+
+/* ═══════════════════════════
+   INSTALL TOAST
+═══════════════════════════ */
+function InstallToast({ onInstall, onClose }) {
+  return (
+    <div className="install-toast">
+      <span style={{fontSize:"1.6rem"}}>🌾</span>
+      <div className="install-toast-text">
+        Install Rural Advisory
+        <span>Add to home screen for quick access</span>
+      </div>
+      <button className="install-toast-btn" onClick={onInstall}>Install</button>
+      <button className="install-toast-close" onClick={onClose}>✕</button>
+    </div>
+  );
+}
+
+/* ═══════════════════════════
+   PAGES
+═══════════════════════════ */
+function HomePage({ diseaseDb, setPage }) {
   const count = Object.keys(diseaseDb).length;
   return (
     <div>
       <div className="hero">
-        <h1>🌾 Rural Advisory System</h1>
+        <h1>🌾 Rural Advisory</h1>
         <p>AI-powered crop disease detection · Auto voice remedy · Tamil / Hindi / English</p>
+        <button className="btn btn-outline" style={{marginTop:"1rem",color:"var(--green-200)",borderColor:"var(--green-400)"}}
+                onClick={()=>setPage("detection")}>
+          🔍 Start Detection →
+        </button>
       </div>
-      <div className="grid-3" style={{marginBottom:"1.5rem"}}>
+      <div className="grid-3" style={{marginBottom:"1.2rem"}}>
         <div className="card card-border-low">
-          <h3 style={{marginBottom:".5rem"}}>🤖 AI Detection</h3>
-          <p style={{color:"#4b5563",fontSize:".9rem"}}>Upload a photo or use your camera. ML-powered diagnosis in under a second.</p>
+          <h3 style={{marginBottom:".4rem",fontSize:"1rem"}}>🤖 AI Detection</h3>
+          <p style={{color:"#4b5563",fontSize:".85rem"}}>Upload a photo or use your camera. Instant ML diagnosis.</p>
         </div>
         <div className="card card-border-medium">
-          <h3 style={{marginBottom:".5rem"}}>🗣️ Auto Voice</h3>
-          <p style={{color:"#4b5563",fontSize:".9rem"}}><strong>AI speaks the remedy automatically</strong> in Tamil, Hindi or English right after analysis.</p>
+          <h3 style={{marginBottom:".4rem",fontSize:"1rem"}}>🗣️ Auto Voice</h3>
+          <p style={{color:"#4b5563",fontSize:".85rem"}}>AI speaks the remedy in Tamil, Hindi or English.</p>
         </div>
         <div className="card card-border-high">
-          <h3 style={{marginBottom:".5rem"}}>🌦️ Weather Advice</h3>
-          <p style={{color:"#4b5563",fontSize:".9rem"}}>Smart spraying recommendations based on your local weather conditions.</p>
+          <h3 style={{marginBottom:".4rem",fontSize:"1rem"}}>🌦️ Weather</h3>
+          <p style={{color:"#4b5563",fontSize:".85rem"}}>Smart spraying advice based on local weather.</p>
         </div>
       </div>
-      <h2 style={{marginBottom:"1rem",color:"#1b4332"}}>📈 System Statistics</h2>
+      <h2 style={{marginBottom:"1rem",color:"#1b4332",fontSize:"1.1rem"}}>📈 System Statistics</h2>
       <div className="grid-4">
-        <MetricTile value="1,234" label="Total Predictions" delta="+12%"/>
-        <MetricTile value="94.2%" label="Avg Accuracy" delta="+2.1%"/>
-        <MetricTile value="567" label="Active Users" delta="+45"/>
-        <MetricTile value={count || 7} label="Diseases Covered" />
+        <MetricTile value="1,234" label="Predictions" delta="+12%"/>
+        <MetricTile value="94.2%" label="Accuracy" delta="+2.1%"/>
+        <MetricTile value="567" label="Users" delta="+45"/>
+        <MetricTile value={count||7} label="Diseases"/>
+      </div>
+
+      {/* Quick mobile access card */}
+      <div className="mobile-access-banner" style={{marginTop:"1.2rem"}}>
+        <div className="icon">📱</div>
+        <div>
+          <h4>Open on Your Phone</h4>
+          <p>Connect your phone to the same Wi-Fi, then visit <code>http://YOUR-PC-IP:5500</code> in your mobile browser. Tap <strong>Add to Home Screen</strong> to install as an app.</p>
+        </div>
       </div>
     </div>
   );
@@ -478,7 +926,7 @@ function HomePage({ diseaseDb }) {
 
 function DetectionPage({ language, location, diseaseDb }) {
   const T = TRANSLATIONS[language];
-  const [inputMode, setInputMode] = useState("upload"); // upload | camera
+  const [inputMode, setInputMode] = useState("upload");
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [result, setResult] = useState(null);
@@ -492,186 +940,148 @@ function DetectionPage({ language, location, diseaseDb }) {
   const audioRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Start camera
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode:"environment" } });
+      const stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:"environment" } });
       setCamStream(stream);
       if(videoRef.current) videoRef.current.srcObject = stream;
     } catch(e) { alert("Camera access denied: " + e.message); }
   };
-
-  // Stop camera
   const stopCamera = () => {
     if(camStream) { camStream.getTracks().forEach(t=>t.stop()); setCamStream(null); }
   };
+  useEffect(()=>{ if(inputMode==="camera") startCamera(); else stopCamera(); return ()=>stopCamera(); }, [inputMode]);
 
-  useEffect(() => {
-    if(inputMode==="camera") startCamera();
-    else stopCamera();
-    return () => stopCamera();
-  }, [inputMode]);
-
-  // Capture frame
   const capture = () => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext("2d").drawImage(video, 0, 0);
-    canvas.toBlob(blob => {
-      const file = new File([blob], "capture.jpg", { type:"image/jpeg" });
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(blob));
-      stopCamera();
-      setInputMode("upload"); // show preview
-    }, "image/jpeg", 0.9);
+    const video = videoRef.current, canvas = canvasRef.current;
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    canvas.getContext("2d").drawImage(video,0,0);
+    canvas.toBlob(blob=>{
+      const file = new File([blob],"capture.jpg",{type:"image/jpeg"});
+      setImageFile(file); setImagePreview(URL.createObjectURL(blob));
+      stopCamera(); setInputMode("upload");
+    },"image/jpeg",0.9);
   };
 
-  // File upload
   const handleFile = e => {
-    const file = e.target.files[0];
-    if(!file) return;
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
+    const file = e.target.files[0]; if(!file) return;
+    setImageFile(file); setImagePreview(URL.createObjectURL(file));
     setResult(null); setAudioSrc(null);
   };
 
-  // Analyze
   const analyze = async () => {
     if(!imageFile) return;
     setAnalyzing(true); setResult(null); setAudioSrc(null);
     try {
-      const fd = new FormData();
-      fd.append("file", imageFile);
+      const fd = new FormData(); fd.append("file", imageFile);
       const res = await fetch(`${API}/api/analyze`, { method:"POST", body:fd });
       if(!res.ok) throw new Error(await res.text());
-      const data = await res.json();
-      setResult(data);
-
-      // Auto-fetch TTS
+      const data = await res.json(); setResult(data);
       if(data.disease_info) {
         setAudioLoading(true);
         const remedy = buildRemedy(data.disease_info, language);
         try {
           const ttsRes = await fetch(`${API}/api/tts`, {
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
+            method:"POST", headers:{"Content-Type":"application/json"},
             body: JSON.stringify({ text:remedy, language }),
           });
           if(ttsRes.ok) {
             const blob = await ttsRes.blob();
             const url  = URL.createObjectURL(blob);
             setAudioSrc(url);
-            // Auto-play
             setTimeout(()=>{ if(audioRef.current) audioRef.current.play().catch(()=>{}); }, 300);
           }
         } catch(e) { console.warn("TTS failed:", e); }
         setAudioLoading(false);
       }
     } catch(e) {
-      alert("Analysis failed: " + e.message + "\n\nMake sure the Python backend is running:\ncd backend && uvicorn main:app --reload");
+      alert("Analysis failed: " + e.message + "\n\nMake sure the Python backend is running:\nuvicorn main:app --reload");
     }
     setAnalyzing(false);
   };
 
-  const info = result?.disease_info;
-  const wx   = MOCK_WEATHER[location] || MOCK_WEATHER.Other;
+  const info   = result?.disease_info;
+  const wx     = MOCK_WEATHER[location] || MOCK_WEATHER.Other;
   const remedy = info ? buildRemedy(info, language) : "";
 
   return (
     <div>
-      <h2 style={{marginBottom:"1.2rem",color:"#1b4332"}}>🔍 Disease Detection</h2>
+      <h2 style={{marginBottom:"1.1rem",color:"#1b4332",fontSize:"1.2rem"}}>🔍 Disease Detection</h2>
 
-      {/* Input mode toggle */}
-      <div style={{display:"flex",gap:8,marginBottom:"1.2rem"}}>
-        <button className={`btn ${inputMode==="upload"?"btn-primary":"btn-outline"}`}
-                onClick={()=>setInputMode("upload")}>📂 Upload Image</button>
-        <button className={`btn ${inputMode==="camera"?"btn-primary":"btn-outline"}`}
-                onClick={()=>setInputMode("camera")}>📷 Live Camera</button>
+      {/* Input toggle */}
+      <div style={{display:"flex",gap:8,marginBottom:"1rem"}}>
+        <button className={`btn ${inputMode==="upload"?"btn-primary":"btn-outline"}`} style={{flex:1,justifyContent:"center"}}
+                onClick={()=>setInputMode("upload")}>📂 Upload</button>
+        <button className={`btn ${inputMode==="camera"?"btn-primary":"btn-outline"}`} style={{flex:1,justifyContent:"center"}}
+                onClick={()=>setInputMode("camera")}>📷 Camera</button>
       </div>
 
-      <div className="grid-2">
-        {/* Left: image input */}
-        <div>
-          {inputMode === "upload" && !imagePreview && (
-            <div className="upload-zone" onClick={()=>fileInputRef.current.click()}>
-              <span className="upload-icon">🌿</span>
-              <p style={{fontWeight:700,color:"#2d6a4f",marginBottom:4}}>Click to upload a leaf image</p>
-              <p style={{fontSize:".82rem",color:"#6b7280"}}>JPG, PNG supported</p>
-              <input ref={fileInputRef} type="file" accept="image/*" style={{display:"none"}} onChange={handleFile}/>
-            </div>
-          )}
-          {inputMode === "upload" && imagePreview && (
-            <div>
-              <img src={imagePreview} className="img-preview" alt="Preview"/>
-              <button className="btn btn-outline" style={{marginTop:8,fontSize:".8rem",padding:"6px 14px"}}
-                      onClick={()=>{setImagePreview(null);setImageFile(null);setResult(null);fileInputRef.current.click();}}>
-                🔄 Change Image
-              </button>
-              <input ref={fileInputRef} type="file" accept="image/*" style={{display:"none"}} onChange={handleFile}/>
-            </div>
-          )}
-          {inputMode === "camera" && (
-            <div>
-              <div className="camera-wrapper">
-                <video ref={videoRef} autoPlay playsInline muted style={{width:"100%",maxHeight:320,objectFit:"cover"}}/>
-              </div>
-              <canvas ref={canvasRef} style={{display:"none"}}/>
-              <button className="btn btn-primary" style={{marginTop:10,width:"100%"}} onClick={capture}>
-                📸 Capture Photo
-              </button>
-            </div>
-          )}
+      {/* Image input */}
+      {inputMode==="upload" && !imagePreview && (
+        <div className="upload-zone" onClick={()=>fileInputRef.current.click()}>
+          <span className="upload-icon">🌿</span>
+          <p style={{fontWeight:700,color:"#2d6a4f",marginBottom:4}}>Tap to upload a leaf image</p>
+          <p style={{fontSize:".82rem",color:"#6b7280"}}>JPG, PNG supported</p>
+          <input ref={fileInputRef} type="file" accept="image/*" capture="environment" style={{display:"none"}} onChange={handleFile}/>
         </div>
-
-        {/* Right: analyze button + weather location */}
+      )}
+      {inputMode==="upload" && imagePreview && (
         <div>
-          <div className="card">
-            <h3 style={{marginBottom:"1rem"}}>⚙️ Settings</h3>
-            <label style={{display:"block",marginBottom:".4rem",fontWeight:600,fontSize:".85rem"}}>Location (for weather)</label>
-            <div style={{fontSize:".88rem",color:"#4b5563"}}>Using: <strong>{location}</strong> (change in navbar)</div>
-            <hr style={{margin:"1rem 0",borderColor:"#e5e7eb"}}/>
+          <img src={imagePreview} className="img-preview" alt="Preview"/>
+          <div style={{display:"flex",gap:8,marginTop:8}}>
+            <button className="btn btn-outline" style={{fontSize:".82rem",padding:"8px 14px"}}
+                    onClick={()=>{ setImagePreview(null); setImageFile(null); setResult(null); fileInputRef.current.click(); }}>
+              🔄 Change
+            </button>
             {imageFile && (
-              <button className="btn btn-primary btn-full" onClick={analyze} disabled={analyzing}>
-                {analyzing ? "⏳ Analysing…" : T.analyze}
+              <button className="btn btn-primary" style={{flex:1,justifyContent:"center"}} onClick={analyze} disabled={analyzing}>
+                {analyzing?"⏳ Analysing…":T.analyze}
               </button>
             )}
-            {!imageFile && <p style={{color:"#9ca3af",fontSize:".88rem"}}>Upload or capture an image first.</p>}
           </div>
+          <input ref={fileInputRef} type="file" accept="image/*" capture="environment" style={{display:"none"}} onChange={handleFile}/>
         </div>
-      </div>
+      )}
+      {inputMode==="camera" && (
+        <div>
+          <div className="camera-wrapper">
+            <video ref={videoRef} autoPlay playsInline muted style={{width:"100%",maxHeight:300,objectFit:"cover"}}/>
+          </div>
+          <canvas ref={canvasRef} style={{display:"none"}}/>
+          <button className="btn btn-primary btn-full" style={{marginTop:10}} onClick={capture}>
+            📸 Capture Photo
+          </button>
+        </div>
+      )}
 
-      {/* Spinner */}
+      {!imageFile && inputMode==="upload" && !imagePreview && (
+        <div style={{textAlign:"center",marginTop:"1rem"}}>
+          <p style={{color:"#9ca3af",fontSize:".85rem"}}>Upload an image first, then tap Analyze</p>
+        </div>
+      )}
+
       {analyzing && <div className="spinner"/>}
 
-      {/* Results */}
       {result && !analyzing && (
-        <div style={{marginTop:"1.5rem"}}>
-          {/* Metrics */}
-          <div className="grid-3" style={{marginBottom:"1.2rem"}}>
-            <MetricTile value={info ? (language==="Tamil"?info.tamil_name:language==="Hindi"?info.hindi_name:info.name) : result.disease_key.replace(/_/g," ")} label={T.detected}/>
+        <div style={{marginTop:"1.2rem"}}>
+          <div className="grid-3" style={{marginBottom:"1rem"}} >
+            <MetricTile value={info?(language==="Tamil"?info.tamil_name:language==="Hindi"?info.hindi_name:info.name):result.disease_key.replace(/_/g," ")} label={T.detected}/>
             <MetricTile value={`${Math.round(result.confidence*100)}%`} label={T.confidence}/>
             <MetricTile value={`${result.processing_time}s`} label={T.proc_time}/>
           </div>
           <ConfBar value={result.confidence}/>
 
-          {/* Healthy */}
-          {result.disease_key === "Healthy" && (
-            <div className="alert alert-green" style={{marginTop:"1rem",fontSize:"1rem"}}>
-              {T.healthy}
-            </div>
+          {result.disease_key==="Healthy" && (
+            <div className="alert alert-green" style={{marginTop:"1rem"}}>{T.healthy}</div>
           )}
 
-          {/* Voice banner + audio */}
           {audioSrc && (
             <div style={{marginTop:"1rem"}}>
               <div className="voice-banner">
-                <span className="pulse">🔊</span>
-                <span>{T.speaking}</span>
+                <span className="pulse">🔊</span><span>{T.speaking}</span>
               </div>
               <audio ref={audioRef} controls src={audioSrc} style={{width:"100%",marginBottom:".5rem"}}/>
-              <a href={audioSrc} download="remedy.mp3" className="btn btn-outline" style={{fontSize:".82rem",padding:"6px 14px",display:"inline-flex"}}>
+              <a href={audioSrc} download="remedy.mp3" className="btn btn-outline" style={{fontSize:".82rem",padding:"8px 14px",display:"inline-flex"}}>
                 ⬇️ Download Audio
               </a>
             </div>
@@ -683,16 +1093,12 @@ function DetectionPage({ language, location, diseaseDb }) {
             </div>
           )}
 
-          {/* Remedy text */}
-          {info && (
-            <div className="remedy-box" style={{marginTop:"1rem"}}>{remedy}</div>
-          )}
+          {info && <div className="remedy-box" style={{marginTop:"1rem"}}>{remedy}</div>}
 
-          {/* Detail tabs */}
-          {info && result.disease_key !== "Healthy" && (
-            <div style={{marginTop:"1.5rem"}}>
+          {info && result.disease_key!=="Healthy" && (
+            <div style={{marginTop:"1.2rem"}}>
               <div className="tabs">
-                {[["disease","🦠 Disease"],["treatment","💊 "+T.treatment],["weather","🌦️ "+T.weather],["proba","📊 Confidence"]].map(([k,l])=>(
+                {[["disease","🦠 Disease"],["treatment","💊 Treatment"],["weather","🌦️ Weather"],["proba","📊 Confidence"]].map(([k,l])=>(
                   <button key={k} className={`tab ${activeTab===k?"active":""}`} onClick={()=>setActiveTab(k)}>{l}</button>
                 ))}
               </div>
@@ -700,27 +1106,25 @@ function DetectionPage({ language, location, diseaseDb }) {
               {activeTab==="disease" && (
                 <div>
                   <div className={`card card-border-${info.severity==="high"?"high":info.severity==="medium"?"medium":"low"}`}>
-                    <h3>{language==="Tamil"?info.tamil_name:language==="Hindi"?info.hindi_name:info.name}</h3>
-                    <p style={{color:"#6b7280",fontSize:".85rem",marginTop:4}}>
-                      <em>{info.scientific_name}</em>
-                    </p>
-                    <p style={{marginTop:".6rem",fontSize:".9rem"}}><strong>{T.cause}:</strong> {info.cause}</p>
-                    <div style={{marginTop:".6rem"}}>
+                    <h3 style={{fontSize:"1rem"}}>{language==="Tamil"?info.tamil_name:language==="Hindi"?info.hindi_name:info.name}</h3>
+                    <p style={{color:"#6b7280",fontSize:".82rem",marginTop:4}}><em>{info.scientific_name}</em></p>
+                    <p style={{marginTop:".5rem",fontSize:".88rem"}}><strong>{T.cause}:</strong> {info.cause}</p>
+                    <div style={{marginTop:".5rem"}}>
                       {(info.crops||[]).map(c=><span key={c} className="tag">{c}</span>)}
                       <span className={`tag tag-${info.severity}`} style={{marginLeft:4}}>{info.severity} severity</span>
                     </div>
                   </div>
-                  <div className="grid-2">
+                  <div className="grid-2 keep-2">
                     <div>
-                      <h4 style={{marginBottom:".6rem",color:"#1b4332"}}>{T.symptoms}</h4>
+                      <h4 style={{marginBottom:".5rem",color:"#1b4332",fontSize:".9rem"}}>{T.symptoms}</h4>
                       {(info.symptoms||[]).map((s,i)=>(
-                        <p key={i} style={{fontSize:".88rem",padding:"3px 0",color:"#374151"}}>• {s}</p>
+                        <p key={i} style={{fontSize:".85rem",padding:"2px 0",color:"#374151"}}>• {s}</p>
                       ))}
                     </div>
                     <div>
-                      <h4 style={{marginBottom:".6rem",color:"#1b4332"}}>Optimal Disease Conditions</h4>
+                      <h4 style={{marginBottom:".5rem",color:"#1b4332",fontSize:".9rem"}}>Conditions</h4>
                       {Object.entries(info.optimal_conditions||{}).map(([k,v])=>(
-                        <p key={k} style={{fontSize:".88rem",padding:"3px 0",color:"#374151"}}>• {k}: {v}</p>
+                        <p key={k} style={{fontSize:".85rem",padding:"2px 0",color:"#374151"}}>• {k}: {v}</p>
                       ))}
                     </div>
                   </div>
@@ -731,24 +1135,18 @@ function DetectionPage({ language, location, diseaseDb }) {
                 <div>
                   <div className="grid-2">
                     <div>
-                      <h3 style={{marginBottom:".8rem",color:"#15803d"}}>{T.chemical}</h3>
+                      <h3 style={{marginBottom:".7rem",color:"#15803d",fontSize:".95rem"}}>{T.chemical}</h3>
                       {(info.treatment?.chemical||[]).map((c,i)=><TreatmentCard key={i} item={c} type="chemical"/>)}
                     </div>
                     <div>
-                      <h3 style={{marginBottom:".8rem",color:"#1d4ed8"}}>{T.organic}</h3>
+                      <h3 style={{marginBottom:".7rem",color:"#1d4ed8",fontSize:".95rem"}}>{T.organic}</h3>
                       {(info.treatment?.organic||[]).map((o,i)=><TreatmentCard key={i} item={o} type="organic"/>)}
                     </div>
                   </div>
-                  <div style={{marginTop:"1rem"}}>
-                    <h4 style={{marginBottom:".6rem",color:"#b45309"}}>{T.precautions}</h4>
+                  <div style={{marginTop:".8rem"}}>
+                    <h4 style={{marginBottom:".5rem",color:"#b45309",fontSize:".88rem"}}>{T.precautions}</h4>
                     {(info.precautions||[]).map((p,i)=>(
-                      <div key={i} className="alert alert-yellow" style={{marginBottom:4}}>{p}</div>
-                    ))}
-                  </div>
-                  <div style={{marginTop:"1rem"}}>
-                    <h4 style={{marginBottom:".6rem",color:"#1b4332"}}>{T.prevention}</h4>
-                    {(info.prevention||[]).map((p,i)=>(
-                      <p key={i} style={{fontSize:".88rem",padding:"2px 0"}}>✔️ {p}</p>
+                      <div key={i} className="alert alert-yellow" style={{marginBottom:4,fontSize:".83rem"}}>{p}</div>
                     ))}
                   </div>
                 </div>
@@ -757,13 +1155,13 @@ function DetectionPage({ language, location, diseaseDb }) {
               {activeTab==="weather" && (
                 <div>
                   <div className="grid-4" style={{marginBottom:"1rem"}}>
-                    <div className="metric"><div className="metric-val">{wx.temp}°C</div><div className="metric-lbl">Temperature</div></div>
+                    <div className="metric"><div className="metric-val">{wx.temp}°</div><div className="metric-lbl">Temp</div></div>
                     <div className="metric"><div className="metric-val">{wx.humidity}%</div><div className="metric-lbl">Humidity</div></div>
-                    <div className="metric"><div className="metric-val">{wx.rainfall}mm</div><div className="metric-lbl">Rainfall</div></div>
-                    <div className="metric"><div className="metric-val">{wx.wind}km/h</div><div className="metric-lbl">Wind</div></div>
+                    <div className="metric"><div className="metric-val">{wx.rainfall}mm</div><div className="metric-lbl">Rain</div></div>
+                    <div className="metric"><div className="metric-val">{wx.wind}</div><div className="metric-lbl">Wind km/h</div></div>
                   </div>
-                  <div className={`wx-${wx.status}`} style={{marginBottom:"1rem",fontSize:"1rem"}}>
-                    {wx.status==="ok" ? T.spray_ok : wx.status==="wait" ? T.spray_wait : T.spray_no}
+                  <div className={`wx-${wx.status}`} style={{marginBottom:"1rem"}}>
+                    {wx.status==="ok"?T.spray_ok:wx.status==="wait"?T.spray_wait:T.spray_no}
                   </div>
                   {(wx.messages||[]).map((m,i)=><div key={i} className="alert alert-yellow" style={{marginBottom:4}}>{m}</div>)}
                   <div className="alert alert-blue">🕐 Best spray window: <strong>6:00 AM – 9:00 AM</strong></div>
@@ -772,7 +1170,7 @@ function DetectionPage({ language, location, diseaseDb }) {
 
               {activeTab==="proba" && result.all_proba && (
                 <div className="card">
-                  <h4 style={{marginBottom:"1rem",color:"#1b4332"}}>Model Confidence per Disease</h4>
+                  <h4 style={{marginBottom:"1rem",color:"#1b4332",fontSize:".9rem"}}>Model Confidence per Disease</h4>
                   <ProbaChart allProba={result.all_proba}/>
                 </div>
               )}
@@ -784,97 +1182,33 @@ function DetectionPage({ language, location, diseaseDb }) {
   );
 }
 
-function AnalyticsPage() {
-  const DISEASE_DATA = [
-    {name:"Early Blight",count:150},{name:"Late Blight",count:120},
-    {name:"Powdery Mildew",count:80},{name:"Leaf Spot",count:60},
-    {name:"Rust",count:45},{name:"Healthy",count:180},
-  ];
-  const TREND = Array.from({length:30},(_,i)=>({day:`D${i+1}`,predictions:Math.floor(10+Math.random()*20)}));
-  const COLORS = ["#2d6a4f","#40916c","#74c69d","#f59e0b","#ef4444","#0ea5e9"];
-
-  return (
-    <div>
-      <h2 style={{marginBottom:"1.2rem",color:"#1b4332"}}>📊 Analytics Dashboard</h2>
-      <div className="grid-4" style={{marginBottom:"1.5rem"}}>
-        <MetricTile value="487" label="Total Predictions" delta="+12%"/>
-        <MetricTile value="92.5%" label="Detection Accuracy" delta="+1.2%"/>
-        <MetricTile value="0.856" label="Avg Confidence"/>
-        <MetricTile value="89" label="Farmer Feedback" delta="+5"/>
-      </div>
-
-      <div className="grid-2">
-        <div className="card">
-          <h3 style={{marginBottom:"1rem",color:"#1b4332"}}>Disease Distribution</h3>
-          <Recharts.BarChart width={420} height={260} data={DISEASE_DATA}>
-            <Recharts.CartesianGrid strokeDasharray="3 3"/>
-            <Recharts.XAxis dataKey="name" tick={{fontSize:10}} angle={-20} textAnchor="end" height={50}/>
-            <Recharts.YAxis/>
-            <Recharts.Tooltip/>
-            <Recharts.Bar dataKey="count" fill="#2d6a4f" radius={[4,4,0,0]}/>
-          </Recharts.BarChart>
-        </div>
-        <div className="card">
-          <h3 style={{marginBottom:"1rem",color:"#1b4332"}}>Prediction Trend (30 Days)</h3>
-          <Recharts.LineChart width={420} height={260} data={TREND}>
-            <Recharts.CartesianGrid strokeDasharray="3 3"/>
-            <Recharts.XAxis dataKey="day" tick={{fontSize:9}}/>
-            <Recharts.YAxis/>
-            <Recharts.Tooltip/>
-            <Recharts.Line type="monotone" dataKey="predictions" stroke="#40916c" strokeWidth={2} dot={false}/>
-          </Recharts.LineChart>
-        </div>
-      </div>
-      <div className="grid-2" style={{marginTop:"1.2rem"}}>
-        <div className="card">
-          <h3 style={{marginBottom:"1rem",color:"#1b4332"}}>Treatment Outcomes</h3>
-          <Recharts.PieChart width={380} height={240}>
-            <Recharts.Pie data={[{name:"Improved",value:156},{name:"No Change",value:45},{name:"Worsened",value:12}]}
-                          cx="50%" cy="50%" outerRadius={90} dataKey="value" label={({name,percent})=>`${name} ${(percent*100).toFixed(0)}%`}>
-              {[0,1,2].map(i=><Recharts.Cell key={i} fill={["#40916c","#f59e0b","#ef4444"][i]}/>)}
-            </Recharts.Pie>
-            <Recharts.Tooltip/>
-          </Recharts.PieChart>
-        </div>
-        <div className="card">
-          <h3 style={{marginBottom:"1rem",color:"#1b4332"}}>Accuracy by Disease</h3>
-          <Recharts.RadarChart width={380} height={240} data={[
-            {d:"E.Blight",A:95},{d:"L.Blight",A:91},{d:"Powdery",A:97},
-            {d:"Leaf Spot",A:88},{d:"Rust",A:93},{d:"Bacterial",A:86},
-          ]}>
-            <Recharts.PolarGrid/><Recharts.PolarAngleAxis dataKey="d" tick={{fontSize:11}}/>
-            <Recharts.Radar name="Accuracy" dataKey="A" stroke="#2d6a4f" fill="#2d6a4f" fillOpacity={0.35}/>
-          </Recharts.RadarChart>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function DiseaseDBPage({ diseaseDb, language }) {
   const [search, setSearch] = useState("");
-  const entries = Object.entries(diseaseDb).filter(([k,v])=> {
+  const entries = Object.entries(diseaseDb).filter(([k,v])=>{
     const name = language==="Tamil"?(v.tamil_name||v.name):language==="Hindi"?(v.hindi_name||v.name):v.name;
-    return !search || name.toLowerCase().includes(search.toLowerCase()) || k.toLowerCase().includes(search.toLowerCase());
+    return !search||name.toLowerCase().includes(search.toLowerCase())||k.toLowerCase().includes(search.toLowerCase());
   });
   return (
     <div>
-      <h2 style={{marginBottom:"1.2rem",color:"#1b4332"}}>📖 Disease Database</h2>
+      <h2 style={{marginBottom:"1rem",color:"#1b4332",fontSize:"1.2rem"}}>📖 Disease Database</h2>
       <input placeholder="🔍 Search diseases…" value={search} onChange={e=>setSearch(e.target.value)}
-             style={{width:"100%",padding:"10px 14px",border:"2px solid #d1fae5",borderRadius:10,fontSize:".9rem",marginBottom:"1.2rem",outline:"none"}}/>
-      {entries.map(([key, info]) => {
+             style={{width:"100%",padding:"10px 14px",border:"2px solid #d1fae5",borderRadius:10,fontSize:"16px",marginBottom:"1rem",outline:"none"}}/>
+      {entries.length===0 && (
+        <div className="alert alert-yellow">No diseases found. Make sure the backend is running.</div>
+      )}
+      {entries.map(([key,info])=>{
         const name = language==="Tamil"?(info.tamil_name||info.name):language==="Hindi"?(info.hindi_name||info.name):info.name;
         const sev  = info.severity;
         return (
-          <Expander key={key} title={`${sev==="high"?"🔴":sev==="medium"?"🟡":"🟢"} ${name} (${sev} severity)`}>
-            <div className="grid-3" style={{marginBottom:"1rem"}}>
-              <div><strong>Cause:</strong><p style={{fontSize:".85rem",color:"#4b5563",marginTop:4}}>{info.cause}</p></div>
-              <div><strong>Affects:</strong>{(info.crops||[]).map(c=><span key={c} className="tag" style={{display:"block",margin:"2px 0"}}>{c}</span>)}</div>
-              <div><strong>Treatments:</strong>
-                <p style={{fontSize:".85rem",color:"#4b5563",marginTop:4}}>Chemical: {(info.treatment?.chemical||[]).length} | Organic: {(info.treatment?.organic||[]).length}</p>
+          <Expander key={key} title={`${sev==="high"?"🔴":sev==="medium"?"🟡":"🟢"} ${name} (${sev})`}>
+            <div className="grid-3" style={{marginBottom:".8rem"}}>
+              <div><strong style={{fontSize:".85rem"}}>Cause:</strong><p style={{fontSize:".82rem",color:"#4b5563",marginTop:3}}>{info.cause}</p></div>
+              <div><strong style={{fontSize:".85rem"}}>Affects:</strong>{(info.crops||[]).map(c=><span key={c} className="tag" style={{display:"block",margin:"2px 0"}}>{c}</span>)}</div>
+              <div><strong style={{fontSize:".85rem"}}>Treatments:</strong>
+                <p style={{fontSize:".82rem",color:"#4b5563",marginTop:3}}>Chemical: {(info.treatment?.chemical||[]).length} | Organic: {(info.treatment?.organic||[]).length}</p>
               </div>
             </div>
-            <div className="remedy-box" style={{fontSize:".86rem"}}>{buildRemedy(info, language)}</div>
+            <div className="remedy-box" style={{fontSize:".84rem"}}>{buildRemedy(info, language)}</div>
           </Expander>
         );
       })}
@@ -892,8 +1226,8 @@ function HistoryPage() {
   ];
   return (
     <div>
-      <h2 style={{marginBottom:"1.2rem",color:"#1b4332"}}>📋 Treatment History</h2>
-      <div className="card" style={{padding:0,overflow:"hidden"}}>
+      <h2 style={{marginBottom:"1rem",color:"#1b4332",fontSize:"1.2rem"}}>📋 Treatment History</h2>
+      <div className="card" style={{padding:0,overflow:"hidden",overflowX:"auto"}}>
         <table className="data-table">
           <thead><tr><th>Date</th><th>Disease</th><th>Treatment</th><th>Outcome</th><th>Location</th></tr></thead>
           <tbody>{data.map((r,i)=>(
@@ -909,56 +1243,206 @@ function HistoryPage() {
   );
 }
 
+function MobileAccessPage() {
+  const [copied, setCopied] = useState(false);
+
+  const copy = text => {
+    navigator.clipboard?.writeText(text).catch(()=>{});
+    setCopied(true); setTimeout(()=>setCopied(false),2000);
+  };
+
+  return (
+    <div>
+      <h2 style={{marginBottom:"1rem",color:"#1b4332",fontSize:"1.2rem"}}>📱 Mobile Access Guide</h2>
+
+      <div className="alert alert-green" style={{marginBottom:"1.2rem",fontSize:".95rem"}}>
+        ✅ This app is <strong>PWA-ready</strong> — install it as a native-like app on Android or iPhone!
+      </div>
+
+      {/* Step Cards */}
+      {[
+        {
+          step:"1", icon:"🌐", title:"Find Your PC's Local IP Address",
+          content: (
+            <div>
+              <p style={{fontSize:".88rem",marginBottom:".6rem"}}>Open a terminal on the computer running this app:</p>
+              <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                {[
+                  ["Windows (CMD/PowerShell)", "ipconfig\n→ Look for: IPv4 Address . . . 192.168.x.x"],
+                  ["Mac", "ifconfig | grep 'inet '\n→ Look for an address like 192.168.x.x"],
+                  ["Linux", "ip addr show\n→ Find inet under your Wi-Fi adapter (wlan0)"],
+                ].map(([os,cmd])=>(
+                  <div key={os} style={{background:"var(--gray-800)",borderRadius:8,padding:"10px 12px"}}>
+                    <div style={{color:"var(--green-400)",fontSize:".75rem",fontWeight:700,marginBottom:4}}>{os}</div>
+                    <div style={{color:"#e5e7eb",fontFamily:"monospace",fontSize:".82rem",whiteSpace:"pre"}}>{cmd}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        },
+        {
+          step:"2", icon:"🖥️", title:"Start a Local Server",
+          content: (
+            <div>
+              <p style={{fontSize:".88rem",marginBottom:".8rem"}}>You must serve this HTML file (not open as file://) so mobile can reach it:</p>
+              {[
+                ["VS Code (Recommended)", "Install the Live Server extension\nRight-click rural_advisory.html → Open with Live Server\nDefault port: 5500"],
+                ["Python 3", "cd path/to/your/project\npython -m http.server 8080\nThen visit: http://YOUR-IP:8080"],
+                ["Node.js", "npx serve . -p 8080\nThen visit: http://YOUR-IP:8080"],
+              ].map(([method,cmd])=>(
+                <div key={method} style={{background:"var(--gray-800)",borderRadius:8,padding:"10px 12px",marginBottom:8}}>
+                  <div style={{color:"var(--green-400)",fontSize:".75rem",fontWeight:700,marginBottom:4}}>{method}</div>
+                  <div style={{color:"#e5e7eb",fontFamily:"monospace",fontSize:".82rem",whiteSpace:"pre"}}>{cmd}</div>
+                </div>
+              ))}
+              <div className="alert alert-yellow" style={{marginTop:".6rem",fontSize:".83rem"}}>
+                ⚠️ Also start the Python backend with: <code>uvicorn main:app --reload --host 0.0.0.0</code> to allow mobile connections
+              </div>
+            </div>
+          )
+        },
+        {
+          step:"3", icon:"📱", title:"Open on Your Phone",
+          content: (
+            <div>
+              <p style={{fontSize:".88rem",marginBottom:".8rem"}}>Make sure your phone and PC are on the <strong>same Wi-Fi network</strong>, then:</p>
+              <div style={{background:"var(--green-800)",borderRadius:10,padding:"1rem",textAlign:"center",marginBottom:"1rem"}}>
+                <div style={{color:"var(--green-200)",fontSize:".8rem",marginBottom:4}}>Open this URL in your phone's browser:</div>
+                <div style={{color:"white",fontFamily:"monospace",fontSize:"1.15rem",fontWeight:800,letterSpacing:".5px"}}>http://192.168.x.x:5500</div>
+                <div style={{color:"var(--green-400)",fontSize:".78rem",marginTop:4}}>(Replace x.x with your PC's IP from Step 1)</div>
+              </div>
+              <button className="btn btn-outline btn-full" onClick={()=>copy("http://192.168.x.x:5500")}>
+                {copied?"✅ Copied!":"📋 Copy URL Template"}
+              </button>
+            </div>
+          )
+        },
+        {
+          step:"4", icon:"⬇️", title:"Install as a Home Screen App (PWA)",
+          content: (
+            <div>
+              <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
+                <div style={{flex:1,minWidth:200,background:"#f0fdf4",borderRadius:10,padding:"1rem",border:"1px solid #86efac"}}>
+                  <div style={{fontWeight:700,marginBottom:".5rem",color:"#166534"}}>🤖 Android (Chrome)</div>
+                  <ol style={{paddingLeft:"1.2rem",fontSize:".85rem",color:"#374151",lineHeight:1.7}}>
+                    <li>Open the URL in Chrome</li>
+                    <li>Tap the ⋮ (3-dot menu)</li>
+                    <li>Tap <strong>Add to Home screen</strong></li>
+                    <li>Tap <strong>Add</strong> to confirm</li>
+                  </ol>
+                </div>
+                <div style={{flex:1,minWidth:200,background:"#eff6ff",borderRadius:10,padding:"1rem",border:"1px solid #93c5fd"}}>
+                  <div style={{fontWeight:700,marginBottom:".5rem",color:"#1e40af"}}>🍎 iPhone (Safari)</div>
+                  <ol style={{paddingLeft:"1.2rem",fontSize:".85rem",color:"#374151",lineHeight:1.7}}>
+                    <li>Open the URL in Safari</li>
+                    <li>Tap the Share icon (□↑)</li>
+                    <li>Scroll and tap <strong>Add to Home Screen</strong></li>
+                    <li>Tap <strong>Add</strong></li>
+                  </ol>
+                </div>
+              </div>
+              <div className="alert alert-blue" style={{marginTop:".8rem",fontSize:".83rem"}}>
+                📲 After installing, the app opens full-screen like a native app — no browser bar, with offline support via Service Worker.
+              </div>
+            </div>
+          )
+        },
+        {
+          step:"5", icon:"📷", title:"Camera Access on Mobile",
+          content: (
+            <div>
+              <p style={{fontSize:".88rem",lineHeight:1.6,marginBottom:".6rem"}}>
+                On mobile, the <strong>Upload Image</strong> button automatically opens your camera or gallery.
+                The <strong>Live Camera</strong> tab uses your rear camera for real-time capture.
+              </p>
+              <div className="alert alert-yellow" style={{fontSize:".83rem"}}>
+                ⚠️ Camera access requires serving over HTTPS or localhost. If using a local IP (http://), Chrome may still allow it — iOS Safari requires HTTPS for camera. Use a tool like <code>ngrok</code> for HTTPS tunneling if needed.
+              </div>
+              <div style={{background:"var(--gray-800)",borderRadius:8,padding:"10px 12px",marginTop:".6rem"}}>
+                <div style={{color:"var(--green-400)",fontSize:".75rem",fontWeight:700,marginBottom:4}}>HTTPS with ngrok (optional)</div>
+                <div style={{color:"#e5e7eb",fontFamily:"monospace",fontSize:".82rem"}}>ngrok http 5500{"\n"}→ Gives you https://xxxx.ngrok.io URL</div>
+              </div>
+            </div>
+          )
+        },
+      ].map(({step,icon,title,content})=>(
+        <Expander key={step} title={`${icon} Step ${step}: ${title}`}>
+          {content}
+        </Expander>
+      ))}
+
+      {/* QR Generator hint */}
+      <div className="card" style={{marginTop:"1.2rem",textAlign:"center"}}>
+        <h3 style={{marginBottom:".5rem",color:"var(--green-800)"}}>📲 Generate a QR Code</h3>
+        <p style={{fontSize:".88rem",color:"var(--gray-600)",marginBottom:"1rem"}}>
+          Create a QR code with your local URL so farmers can scan and open instantly
+        </p>
+        <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+          {[
+            ["QR Code Generator","https://goqr.me"],
+            ["QR.io","https://qr.io"],
+            ["Adobe Express QR","https://adobe.com/express/feature/qr-code-generator"],
+          ].map(([name,url])=>(
+            <a key={name} href={url} target="_blank" rel="noreferrer"
+               className="btn btn-outline" style={{fontSize:".8rem",padding:"8px 14px"}}>
+              {name} ↗
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function SettingsPage({ language, setLanguage, location, setLocation }) {
   const [saved, setSaved] = useState(false);
   const save = () => { setSaved(true); setTimeout(()=>setSaved(false),2500); };
   return (
     <div>
-      <h2 style={{marginBottom:"1.2rem",color:"#1b4332"}}>⚙️ Settings</h2>
+      <h2 style={{marginBottom:"1rem",color:"#1b4332",fontSize:"1.2rem"}}>⚙️ Settings</h2>
       <div className="grid-2">
         <div className="card">
-          <h3 style={{marginBottom:"1rem"}}>👤 Profile</h3>
+          <h3 style={{marginBottom:".9rem",fontSize:"1rem"}}>👤 Profile</h3>
           {[["Name","Farmer Name"],["Phone","+91-XXXXXXXXXX"],["Email","farmer@example.com"]].map(([l,p])=>(
-            <div key={l} style={{marginBottom:".8rem"}}>
-              <label style={{display:"block",fontWeight:600,fontSize:".85rem",marginBottom:4}}>{l}</label>
-              <input placeholder={p} style={{width:"100%",padding:"8px 12px",border:"1.5px solid #e5e7eb",borderRadius:8,fontSize:".88rem"}}/>
+            <div key={l} style={{marginBottom:".7rem"}}>
+              <label style={{display:"block",fontWeight:600,fontSize:".83rem",marginBottom:3}}>{l}</label>
+              <input placeholder={p} style={{width:"100%",padding:"10px 12px",border:"1.5px solid #e5e7eb",borderRadius:8,fontSize:"16px"}}/>
             </div>
           ))}
-          <div style={{marginBottom:".8rem"}}>
-            <label style={{display:"block",fontWeight:600,fontSize:".85rem",marginBottom:4}}>Language</label>
+          <div style={{marginBottom:".7rem"}}>
+            <label style={{display:"block",fontWeight:600,fontSize:".83rem",marginBottom:3}}>Language</label>
             <select value={language} onChange={e=>setLanguage(e.target.value)}
-                    style={{width:"100%",padding:"8px 12px",border:"1.5px solid #e5e7eb",borderRadius:8,fontSize:".88rem"}}>
+                    style={{width:"100%",padding:"10px 12px",border:"1.5px solid #e5e7eb",borderRadius:8,fontSize:"16px"}}>
               {["English","Tamil","Hindi"].map(l=><option key={l}>{l}</option>)}
             </select>
           </div>
-          <div style={{marginBottom:".8rem"}}>
-            <label style={{display:"block",fontWeight:600,fontSize:".85rem",marginBottom:4}}>Location</label>
+          <div>
+            <label style={{display:"block",fontWeight:600,fontSize:".83rem",marginBottom:3}}>Location</label>
             <select value={location} onChange={e=>setLocation(e.target.value)}
-                    style={{width:"100%",padding:"8px 12px",border:"1.5px solid #e5e7eb",borderRadius:8,fontSize:".88rem"}}>
+                    style={{width:"100%",padding:"10px 12px",border:"1.5px solid #e5e7eb",borderRadius:8,fontSize:"16px"}}>
               {Object.keys(MOCK_WEATHER).map(l=><option key={l}>{l}</option>)}
             </select>
           </div>
         </div>
         <div className="card">
-          <h3 style={{marginBottom:"1rem"}}>🔔 Notifications</h3>
+          <h3 style={{marginBottom:".9rem",fontSize:"1rem"}}>🔔 Notifications</h3>
           {[["Enable Notifications",true],["Daily Updates",true],["Disease Risk Alerts",true],["Email Reports",false]].map(([l,d])=>(
-            <label key={l} style={{display:"flex",alignItems:"center",gap:10,marginBottom:"1rem",cursor:"pointer"}}>
+            <label key={l} style={{display:"flex",alignItems:"center",gap:10,marginBottom:".9rem",cursor:"pointer"}}>
               <input type="checkbox" defaultChecked={d} style={{width:18,height:18,accentColor:"#2d6a4f"}}/>
-              <span style={{fontWeight:500}}>{l}</span>
+              <span style={{fontWeight:500,fontSize:".9rem"}}>{l}</span>
             </label>
           ))}
-          <h3 style={{marginBottom:"1rem",marginTop:"1rem"}}>🌾 Primary Crops</h3>
+          <h3 style={{marginBottom:".8rem",marginTop:"1rem",fontSize:"1rem"}}>🌾 Primary Crops</h3>
           {["Tomato","Potato","Rice","Wheat","Cotton"].map(c=>(
-            <label key={c} style={{display:"flex",alignItems:"center",gap:10,marginBottom:8,cursor:"pointer"}}>
+            <label key={c} style={{display:"flex",alignItems:"center",gap:10,marginBottom:7,cursor:"pointer"}}>
               <input type="checkbox" defaultChecked={["Tomato","Potato"].includes(c)} style={{width:16,height:16,accentColor:"#2d6a4f"}}/>
               <span style={{fontSize:".9rem"}}>{c}</span>
             </label>
           ))}
         </div>
       </div>
-      <button className="btn btn-primary" onClick={save} style={{marginTop:"1rem"}}>
-        💾 Save Settings
-      </button>
+      <button className="btn btn-primary" onClick={save} style={{marginTop:"1rem"}}>💾 Save Settings</button>
       {saved && <div className="alert alert-green" style={{marginTop:"1rem",display:"inline-block",marginLeft:12}}>✅ Saved!</div>}
     </div>
   );
@@ -966,63 +1450,103 @@ function SettingsPage({ language, setLanguage, location, setLocation }) {
 
 function HelpPage() {
   const faqs = [
-    ["How does auto-voice work?","After clicking Analyze Image, the AI generates a full remedy text in your selected language (Tamil/Hindi/English) and plays it automatically using Google Text-to-Speech (gTTS) via the Python backend."],
-    ["How do I detect a disease?","Go to Detection → Upload Image or Use Camera → click Analyze Image. The ML model analyses your crop photo and returns a diagnosis instantly."],
+    ["How does auto-voice work?","After clicking Analyze Image, the AI generates a full remedy text in your selected language and plays it automatically using Google Text-to-Speech (gTTS) via the Python backend."],
+    ["How do I detect a disease?","Go to Detection → Upload Image or Use Camera → tap Analyze Image. The ML model analyses your crop photo instantly."],
     ["Which languages are supported?","Tamil (தமிழ்), Hindi (हिन्दी) and English. Change via the navbar dropdowns."],
-    ["Why is voice not playing?","Make sure the Python backend is running (uvicorn main:app --reload) and gTTS is installed (pip install gtts). An internet connection is needed for TTS."],
-    ["How accurate is the detection?","The Random Forest model achieves ~90–95% accuracy on held-out crop images. Upload a clear, well-lit leaf photo for best results."],
-    ["How do I run this locally?","Start the backend: cd backend && pip install -r requirements.txt && uvicorn main:app --reload. Open index.html in your browser."],
+    ["Why is voice not playing?","Make sure the Python backend is running (uvicorn main:app --reload) and gTTS is installed (pip install gtts). Internet is needed for TTS."],
+    ["How accurate is the detection?","The Random Forest model achieves ~90–95% accuracy. Upload a clear, well-lit leaf photo for best results."],
+    ["How do I access on mobile?","Go to the 📱 Mobile Access page for step-by-step instructions to open the app on any phone on the same Wi-Fi."],
+    ["How do I install as an app?","Open the URL in Chrome (Android) or Safari (iOS), then use Add to Home Screen from the browser menu."],
   ];
   return (
     <div>
-      <h2 style={{marginBottom:"1.2rem",color:"#1b4332"}}>❓ Help & FAQ</h2>
+      <h2 style={{marginBottom:"1rem",color:"#1b4332",fontSize:"1.2rem"}}>❓ Help & FAQ</h2>
       {faqs.map(([q,a])=>(
-        <Expander key={q} title={q}><p style={{fontSize:".9rem",color:"#374151",lineHeight:1.7}}>{a}</p></Expander>
+        <Expander key={q} title={q}><p style={{fontSize:".88rem",color:"#374151",lineHeight:1.7}}>{a}</p></Expander>
       ))}
-      <div className="alert alert-green" style={{marginTop:"1.5rem",fontSize:".95rem"}}>
-        📞 <strong>Helpline:</strong> 1800-RURAL-HELP &nbsp;|&nbsp; ✉️ <strong>Email:</strong> support@ruralavisory.in
+      <div className="alert alert-green" style={{marginTop:"1.2rem",fontSize:".9rem"}}>
+        📞 <strong>Helpline:</strong> 1800-RURAL-HELP &nbsp;|&nbsp; ✉️ <strong>Email:</strong> support@ruraladvise.in
       </div>
     </div>
   );
 }
 
-// ═══════════════════════════════════════════════
-//  APP ROOT
-// ═══════════════════════════════════════════════
+/* ═══════════════════════════
+   APP ROOT
+═══════════════════════════ */
 function App() {
-  const [page,     setPage]     = useState("home");
-  const [language, setLanguage] = useState("English");
-  const [location, setLocation] = useState("Chennai");
-  const [diseaseDb, setDiseaseDb] = useState({});
+  const [page,        setPage]        = useState("home");
+  const [language,    setLanguage]    = useState("English");
+  const [location,    setLocation]    = useState("Chennai");
+  const [diseaseDb,   setDiseaseDb]   = useState({});
+  const [drawerOpen,  setDrawerOpen]  = useState(false);
+  const [showInstall, setShowInstall] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
 
-  // Fetch disease DB from backend
-  useEffect(() => {
+  // PWA install prompt
+  useEffect(()=>{
+    const handler = e => { e.preventDefault(); setDeferredPrompt(e); setShowInstall(true); };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if(deferredPrompt) {
+      deferredPrompt.prompt();
+      const result = await deferredPrompt.userChoice;
+      setDeferredPrompt(null); setShowInstall(false);
+    }
+  };
+
+  // Close drawer on outside tap
+  useEffect(()=>{
+    if(!drawerOpen) return;
+    const close = e => { if(!e.target.closest(".mobile-drawer") && !e.target.closest(".hamburger")) setDrawerOpen(false); };
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, [drawerOpen]);
+
+  // Fetch disease DB
+  useEffect(()=>{
     fetch(`${API}/api/diseases`)
-      .then(r=>r.json())
-      .then(setDiseaseDb)
-      .catch(()=>console.warn("Backend not reachable — disease DB will be empty. Start uvicorn."));
+      .then(r=>r.json()).then(setDiseaseDb)
+      .catch(()=>console.warn("Backend not reachable."));
   }, []);
 
   const renderPage = () => {
     switch(page) {
-      case "home":       return <HomePage diseaseDb={diseaseDb}/>;
-      case "detection":  return <DetectionPage language={language} location={location} diseaseDb={diseaseDb}/>;
-      case "analytics":  return <AnalyticsPage/>;
-      case "disease_db": return <DiseaseDBPage diseaseDb={diseaseDb} language={language}/>;
-      case "history":    return <HistoryPage/>;
-      case "settings":   return <SettingsPage language={language} setLanguage={setLanguage} location={location} setLocation={setLocation}/>;
-      case "help":       return <HelpPage/>;
-      default:           return <HomePage diseaseDb={diseaseDb}/>;
+      case "home":          return <HomePage diseaseDb={diseaseDb} setPage={setPage}/>;
+      case "detection":     return <DetectionPage language={language} location={location} diseaseDb={diseaseDb}/>;
+      case "disease_db":    return <DiseaseDBPage diseaseDb={diseaseDb} language={language}/>;
+      case "history":       return <HistoryPage/>;
+      case "mobile_access": return <MobileAccessPage/>;
+      case "settings":      return <SettingsPage language={language} setLanguage={setLanguage} location={location} setLocation={setLocation}/>;
+      case "help":          return <HelpPage/>;
+      default:              return <HomePage diseaseDb={diseaseDb} setPage={setPage}/>;
     }
   };
 
   return (
     <>
-      <Navbar page={page} setPage={setPage} language={language} setLanguage={setLanguage} location={location} setLocation={setLocation}/>
+      <Navbar page={page} setPage={setPage}
+              language={language} setLanguage={setLanguage}
+              location={location} setLocation={setLocation}
+              drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen}/>
+
+      <BottomNav page={page} setPage={page=>{setPage(page);setDrawerOpen(false);}}/>
+
       <main className="main">
         {renderPage()}
-        <div className="footer">🌾 Rural Agricultural Advisory System v2.0 · Built for Indian Farmers · © 2026</div>
+        <div className="footer">
+          🌾 Rural Agricultural Advisory System v2.0 · Built for Indian Farmers · © 2024<br/>
+          <span style={{fontSize:".75rem",opacity:.6}}>PWA-enabled · Mobile-optimised · Tamil / Hindi / English</span>
+        </div>
       </main>
+
+      {/* PWA Install Toast */}
+      {showInstall && (
+        <InstallToast onInstall={handleInstall} onClose={()=>setShowInstall(false)}/>
+      )}
     </>
   );
 }
